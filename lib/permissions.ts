@@ -405,7 +405,6 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
 
     // Accounts
     Permission.ACCOUNT_VIEW,
-    Permission.ACCOUNT_EXPORT,
 
     // Reporting & Analytics (full access)
     Permission.REPORTS_VIEW,
