@@ -92,7 +92,7 @@ export const POST = createAuthHandler(
         if (schedule && !schedule.isPaid) {
           // Calculate late penalty (5% default, 3 days grace period)
           penaltyAmount = calculateLatePenalty(
-            Number(schedule.totalDue - schedule.totalPaid),
+            Number(schedule.totalDue) - Number(schedule.totalPaid),
             schedule.dueDate,
             new Date(),
             {
