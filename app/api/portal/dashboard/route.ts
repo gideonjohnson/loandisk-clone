@@ -41,7 +41,7 @@ export async function GET() {
 
     // Calculate totals
     let totalBalance = 0
-    let nextPayment = null
+    let nextPayment: { amount: number; dueDate: string; loanNumber: string } | null = null
 
     const loanSummaries = loans.map(loan => {
       const balance = Number(loan.principalAmount) // In real app, calculate remaining balance
