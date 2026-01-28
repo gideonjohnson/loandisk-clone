@@ -206,15 +206,20 @@ export async function verifyTwoFactorCode(
  * Disable 2FA for a user
  */
 export async function disable2FA(userId: string): Promise<void> {
-  await prisma.$transaction([
-    prisma.twoFactorAuth.delete({
+  // Delete 2FA record if exists
+  try {
+    await prisma.twoFactorAuth.delete({
       where: { userId },
-    }).catch(() => {}), // Ignore if doesn't exist
-    prisma.user.update({
-      where: { id: userId },
-      data: { twoFactorEnabled: false },
-    }),
-  ])
+    })
+  } catch {
+    // Ignore if doesn't exist
+  }
+
+  // Disable 2FA on user
+  await prisma.user.update({
+    where: { id: userId },
+    data: { twoFactorEnabled: false },
+  })
 }
 
 /**
