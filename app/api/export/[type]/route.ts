@@ -7,6 +7,7 @@ import {
   exportReport,
 } from '@/lib/import-export/importExportService'
 import { logDataExport } from '@/lib/security/auditLog'
+import { Permission } from '@/lib/permissions'
 
 /**
  * GET /api/export/:type
@@ -101,5 +102,5 @@ export const GET = createAuthHandler(
       )
     }
   },
-  ['ADMIN', 'MANAGER']
+  [Permission.REPORTS_EXPORT]
 )
