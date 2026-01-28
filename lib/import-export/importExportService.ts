@@ -408,20 +408,20 @@ async function exportPortfolioReport(): Promise<string> {
     where: { status: 'ACTIVE' },
     include: {
       borrower: true,
-      repaymentSchedules: {
+      schedules: {
         where: {
-          status: { in: ['PENDING', 'PARTIALLY_PAID'] },
+          isPaid: false,
         },
       },
     },
   })
 
   const data = loans.map(loan => {
-    const overdueSchedules = loan.repaymentSchedules.filter(
+    const overdueSchedules = loan.schedules.filter(
       s => new Date(s.dueDate) < new Date()
     )
     const overdueAmount = overdueSchedules.reduce(
-      (sum, s) => sum + (Number(s.totalAmount) - Number(s.paidAmount)),
+      (sum, s) => sum + (Number(s.totalDue) - Number(s.totalPaid)),
       0
     )
 
