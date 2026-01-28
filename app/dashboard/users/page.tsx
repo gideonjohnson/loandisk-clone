@@ -198,7 +198,7 @@ export default function UsersPage() {
                     />
                     <span className="text-sm">{user.active ? 'Active' : 'Inactive'}</span>
                     {user.twoFactorEnabled && (
-                      <Shield className="w-4 h-4 text-green-600" title="2FA Enabled" />
+                      <span title="2FA Enabled"><Shield className="w-4 h-4 text-green-600" /></span>
                     )}
                   </div>
                 </td>
