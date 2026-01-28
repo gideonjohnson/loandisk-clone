@@ -51,8 +51,8 @@ export function PieChart({
               cx="50%"
               cy="50%"
               outerRadius={80}
-              label={(entry) =>
-                `${entry[nameKey]}: ${formatValue ? formatValue(entry[dataKey]) : entry[dataKey]}`
+              label={(entry: Record<string, unknown>) =>
+                `${entry[nameKey]}: ${formatValue ? formatValue(entry[dataKey] as number) : entry[dataKey]}`
               }
               labelLine={false}
             >
