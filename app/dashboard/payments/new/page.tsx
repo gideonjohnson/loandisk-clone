@@ -358,7 +358,7 @@ export default function NewPaymentPage() {
                     <div className="flex justify-between items-center pb-2 border-b">
                       <span className="text-sm text-muted-foreground">Fees</span>
                       <span className="font-semibold">
-                        {formatCurrency(watchFees)}
+                        {formatCurrency(watchFees || 0)}
                       </span>
                     </div>
 
