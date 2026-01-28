@@ -41,15 +41,13 @@ export async function getUpcomingPayments(daysAhead: number): Promise<PaymentWit
   const futureDate = new Date(today)
   futureDate.setDate(futureDate.getDate() + daysAhead)
 
-  const payments = await prisma.repaymentSchedule.findMany({
+  const payments = await prisma.loanSchedule.findMany({
     where: {
       dueDate: {
         gte: today,
         lte: futureDate,
       },
-      status: {
-        in: ['PENDING', 'PARTIALLY_PAID'],
-      },
+      isPaid: false,
     },
     include: {
       loan: {
@@ -65,7 +63,7 @@ export async function getUpcomingPayments(daysAhead: number): Promise<PaymentWit
 
   return payments.map(p => ({
     id: p.id,
-    amount: Number(p.totalAmount) - Number(p.paidAmount),
+    amount: Number(p.totalDue) - Number(p.totalPaid),
     dueDate: p.dueDate,
     loan: {
       id: p.loan.id,
@@ -88,14 +86,12 @@ export async function getOverduePayments(): Promise<PaymentWithDetails[]> {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const payments = await prisma.repaymentSchedule.findMany({
+  const payments = await prisma.loanSchedule.findMany({
     where: {
       dueDate: {
         lt: today,
       },
-      status: {
-        in: ['PENDING', 'PARTIALLY_PAID'],
-      },
+      isPaid: false,
     },
     include: {
       loan: {
@@ -111,7 +107,7 @@ export async function getOverduePayments(): Promise<PaymentWithDetails[]> {
 
   return payments.map(p => ({
     id: p.id,
-    amount: Number(p.totalAmount) - Number(p.paidAmount),
+    amount: Number(p.totalDue) - Number(p.totalPaid),
     dueDate: p.dueDate,
     loan: {
       id: p.loan.id,
@@ -334,7 +330,7 @@ export async function getReminderStats() {
   })
 
   // Get upcoming payments
-  const upcomingCount = await prisma.repaymentSchedule.count({
+  const upcomingCount = await prisma.loanSchedule.count({
     where: {
       dueDate: {
         gte: today,
@@ -347,7 +343,7 @@ export async function getReminderStats() {
   })
 
   // Get overdue payments
-  const overdueCount = await prisma.repaymentSchedule.count({
+  const overdueCount = await prisma.loanSchedule.count({
     where: {
       dueDate: {
         lt: today,
