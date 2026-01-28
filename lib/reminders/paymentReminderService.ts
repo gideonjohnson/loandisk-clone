@@ -151,8 +151,10 @@ export async function sendPaymentReminders(daysAhead: number = 3): Promise<Remin
             borrower.phone,
             borrowerName,
             amount,
-            dueDate,
-            payment.loan.loanNumber
+            payment.dueDate,
+            payment.loan.loanNumber,
+            payment.loan.id,
+            borrower.id
           )
           result.sentSMS++
         } catch (error) {
@@ -167,8 +169,10 @@ export async function sendPaymentReminders(daysAhead: number = 3): Promise<Remin
             borrower.email,
             borrowerName,
             amount,
-            dueDate,
-            payment.loan.loanNumber
+            payment.dueDate,
+            payment.loan.loanNumber,
+            payment.loan.id,
+            borrower.id
           )
           result.sentEmail++
         } catch (error) {
@@ -231,9 +235,11 @@ export async function sendOverdueNotices(): Promise<ReminderResult> {
           await sendPaymentOverdueSMS(
             borrower.phone,
             borrowerName,
-            amount,
-            daysOverdue.toString(),
-            payment.loan.loanNumber
+            parseFloat(amount),
+            daysOverdue,
+            payment.loan.loanNumber,
+            payment.loan.id,
+            borrower.id
           )
           result.sentSMS++
         } catch (error) {
@@ -247,9 +253,11 @@ export async function sendOverdueNotices(): Promise<ReminderResult> {
           await sendPaymentOverdueEmail(
             borrower.email,
             borrowerName,
-            amount,
-            daysOverdue.toString(),
-            payment.loan.loanNumber
+            parseFloat(amount),
+            daysOverdue,
+            payment.loan.loanNumber,
+            payment.loan.id,
+            borrower.id
           )
           result.sentEmail++
         } catch (error) {
