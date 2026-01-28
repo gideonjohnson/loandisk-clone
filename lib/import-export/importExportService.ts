@@ -130,7 +130,7 @@ export async function importBorrowers(csvContent: string, userId: string): Promi
           firstName: row.firstname,
           lastName: row.lastname,
           email: row.email || null,
-          phone: row.phone || null,
+          phone: row.phone || '',
           address: row.address || null,
           city: row.city || null,
           country: row.country || null,
