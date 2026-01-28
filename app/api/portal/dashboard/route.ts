@@ -28,9 +28,9 @@ export async function GET() {
     const loans = await prisma.loan.findMany({
       where: { borrowerId },
       include: {
-        repaymentSchedules: {
+        schedules: {
           where: {
-            status: { in: ['PENDING', 'PARTIALLY_PAID'] },
+            isPaid: false,
           },
           orderBy: { dueDate: 'asc' },
           take: 1,
@@ -47,10 +47,10 @@ export async function GET() {
       const balance = Number(loan.principalAmount) // In real app, calculate remaining balance
       totalBalance += balance
 
-      const nextSchedule = loan.repaymentSchedules[0]
+      const nextSchedule = loan.schedules[0]
       if (nextSchedule && (!nextPayment || new Date(nextSchedule.dueDate) < new Date(nextPayment.dueDate))) {
         nextPayment = {
-          amount: Number(nextSchedule.totalAmount) - Number(nextSchedule.paidAmount),
+          amount: Number(nextSchedule.totalDue) - Number(nextSchedule.totalPaid),
           dueDate: nextSchedule.dueDate.toISOString(),
           loanNumber: loan.loanNumber,
         }
@@ -64,7 +64,7 @@ export async function GET() {
         status: loan.status,
         nextPaymentDate: nextSchedule?.dueDate.toISOString() || null,
         nextPaymentAmount: nextSchedule
-          ? Number(nextSchedule.totalAmount) - Number(nextSchedule.paidAmount)
+          ? Number(nextSchedule.totalDue) - Number(nextSchedule.totalPaid)
           : null,
       }
     })
@@ -73,7 +73,7 @@ export async function GET() {
     const notifications = await prisma.notification.findMany({
       where: {
         userId: borrowerId,
-        readAt: null,
+        status: 'PENDING',
       },
       orderBy: { createdAt: 'desc' },
       take: 5,
