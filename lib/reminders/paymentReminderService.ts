@@ -347,9 +347,7 @@ export async function getReminderStats() {
         gte: today,
         lte: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000),
       },
-      status: {
-        in: ['PENDING', 'PARTIALLY_PAID'],
-      },
+      isPaid: false,
     },
   })
 
@@ -359,9 +357,7 @@ export async function getReminderStats() {
       dueDate: {
         lt: today,
       },
-      status: {
-        in: ['PENDING', 'PARTIALLY_PAID'],
-      },
+      isPaid: false,
     },
   })
 
