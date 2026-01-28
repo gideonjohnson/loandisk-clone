@@ -1,26 +1,193 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Color variables */
+  --color-background: 0 0% 100%;
+  --color-foreground: 222.2 84% 4.9%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 222.2 84% 4.9%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 222.2 84% 4.9%;
+  --color-primary: 221.2 83.2% 53.3%;
+  --color-primary-foreground: 210 40% 98%;
+  --color-secondary: 210 40% 96.1%;
+  --color-secondary-foreground: 222.2 47.4% 11.2%;
+  --color-muted: 210 40% 96.1%;
+  --color-muted-foreground: 215.4 16.3% 46.9%;
+  --color-accent: 210 40% 96.1%;
+  --color-accent-foreground: 222.2 47.4% 11.2%;
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 210 40% 98%;
+  --color-border: 214.3 31.8% 91.4%;
+  --color-input: 214.3 31.8% 91.4%;
+  --color-ring: 221.2 83.2% 53.3%;
+
+  --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Mobile-first responsive utilities */
+@layer utilities {
+  /* Touch-friendly tap targets (minimum 44px) */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent text selection on touch interactions */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safe area padding for notched devices */
+  .safe-area-inset {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth scrolling on iOS */
+  .scroll-smooth-ios {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Responsive text that doesn't break layout */
+  .text-responsive {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  /* Larger touch targets on mobile */
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"],
+  select {
+    min-height: 44px;
+  }
+
+  /* Prevent zoom on input focus in iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Full-width modals on mobile */
+  .modal-content {
+    width: calc(100% - 2rem);
+    max-width: none;
+    margin: 1rem;
+  }
+
+  /* Stack buttons vertically on mobile */
+  .button-group {
+    flex-direction: column;
+  }
+  .button-group > * {
+    width: 100%;
+  }
+}
+
+/* Tablet and larger */
+@media (min-width: 768px) {
+  .button-group {
+    flex-direction: row;
+  }
+  .button-group > * {
+    width: auto;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .print-full-width {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }

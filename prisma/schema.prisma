@@ -1,0 +1,462 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String
+  password          String
+  role              String   @default("LOAN_OFFICER")
+  branchId          String?
+  phoneNumber       String?
+  lastLogin         DateTime?
+  twoFactorEnabled  Boolean  @default(false)
+  profileImage      String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  branch            Branch?  @relation(fields: [branchId], references: [id])
+  loans             Loan[]   @relation("LoanOfficer")
+  payments          Payment[]
+  documents         Document[]
+  approvals         LoanApproval[]
+  disbursements     LoanDisbursement[]
+  notifications     Notification[]
+  activityLogs      ActivityLog[]
+  reportTemplates   ReportTemplate[]
+}
+
+model Borrower {
+  id                String   @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String?
+  phone             String
+  address           String?
+  city              String?
+  country           String?
+  dateOfBirth       DateTime?
+  idNumber          String?  @unique
+  employmentStatus  String?
+  monthlyIncome     Decimal?
+  creditScore       Int?
+  gender            String?
+  maritalStatus     String?
+  nationalId        String?
+  taxId             String?
+  businessName      String?
+  businessType      String?
+  photoUrl          String?
+  kycVerified       Boolean  @default(false)
+  kycVerifiedAt     DateTime?
+  blacklisted       Boolean  @default(false)
+  blacklistReason   String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  loans             Loan[]
+  accounts          Account[]
+  guarantors        Guarantor[]
+  fraudChecks       FraudCheck[]
+  preference        BorrowerPreference?
+  signatureRequests SignatureRequest[]
+}
+
+model Loan {
+  id                String      @id @default(cuid())
+  loanNumber        String      @unique
+  borrowerId        String
+  loanOfficerId     String
+  branchId          String?
+  principalAmount   Decimal
+  interestRate      Decimal
+  termMonths        Int
+  startDate         DateTime
+  endDate           DateTime
+  status            String      @default("PENDING")
+  purpose           String?
+  notes             String?
+  approvalDate      DateTime?
+  disbursementDate  DateTime?
+  approvalLevel     Int         @default(0)
+  requiredApprovals Int         @default(1)
+  rejectionReason   String?
+  collateralValue   Decimal?
+  loanProduct       String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  branch            Branch?     @relation(fields: [branchId], references: [id])
+  borrower          Borrower    @relation(fields: [borrowerId], references: [id])
+  loanOfficer       User        @relation("LoanOfficer", fields: [loanOfficerId], references: [id])
+  schedules         LoanSchedule[]
+  payments          Payment[]
+  collaterals       Collateral[]
+  documents         Document[]
+  approvals         LoanApproval[]
+  disbursement      LoanDisbursement?
+  fees              LoanFee[]
+  penalties         Penalty[]
+  fraudChecks       FraudCheck[]
+  signatureRequests SignatureRequest[]
+}
+
+model LoanSchedule {
+  id                String   @id @default(cuid())
+  loanId            String
+  dueDate           DateTime
+  principalDue      Decimal
+  interestDue       Decimal
+  feesDue           Decimal  @default(0)
+  totalDue          Decimal
+  principalPaid     Decimal  @default(0)
+  interestPaid      Decimal  @default(0)
+  feesPaid          Decimal  @default(0)
+  totalPaid         Decimal  @default(0)
+  isPaid            Boolean  @default(false)
+  paidDate          DateTime?
+  lateDays          Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  penalties         Penalty[]
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  loanId            String
+  amount            Decimal
+  paymentDate       DateTime
+  receivedBy        String
+  paymentMethod     String
+  receiptNumber     String        @unique
+  notes             String?
+  status            String        @default("COMPLETED")
+  principalAmount   Decimal
+  interestAmount    Decimal
+  feesAmount        Decimal       @default(0)
+  reversedBy        String?
+  reversedAt        DateTime?
+  reversalReason    String?
+  isReversed        Boolean       @default(false)
+  originalPaymentId String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  loan              Loan          @relation(fields: [loanId], references: [id])
+  receivedByUser    User          @relation(fields: [receivedBy], references: [id])
+}
+
+model Collateral {
+  id                String   @id @default(cuid())
+  loanId            String
+  type              String
+  description       String
+  estimatedValue    Decimal
+  documentUrl       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+}
+
+model Account {
+  id                String          @id @default(cuid())
+  accountNumber     String          @unique
+  borrowerId        String
+  accountType       String
+  balance           Decimal         @default(0)
+  interestRate      Decimal         @default(0)
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  borrower          Borrower        @relation(fields: [borrowerId], references: [id])
+  transactions      Transaction[]
+}
+
+model Transaction {
+  id                String          @id @default(cuid())
+  accountId         String
+  type              String
+  amount            Decimal
+  balance           Decimal
+  description       String?
+  transactionDate   DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+
+  account           Account         @relation(fields: [accountId], references: [id])
+}
+
+model Document {
+  id                String   @id @default(cuid())
+  loanId            String?
+  type              String
+  fileName          String
+  fileUrl           String
+  generatedBy       String
+  createdAt         DateTime @default(now())
+
+  loan              Loan?    @relation(fields: [loanId], references: [id])
+  generatedByUser   User     @relation(fields: [generatedBy], references: [id])
+}
+
+model Setting {
+  id                String   @id @default(cuid())
+  key               String   @unique
+  value             String
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Branch {
+  id                String   @id @default(cuid())
+  name              String
+  code              String   @unique
+  address           String?
+  city              String?
+  phone             String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  users             User[]
+  loans             Loan[]
+}
+
+model LoanApproval {
+  id                String   @id @default(cuid())
+  loanId            String
+  approvedBy        String
+  approvalLevel     Int
+  status            String
+  comments          String?
+  approvedAt        DateTime?
+  createdAt         DateTime @default(now())
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  approver          User     @relation(fields: [approvedBy], references: [id])
+}
+
+model LoanDisbursement {
+  id                String   @id @default(cuid())
+  loanId            String   @unique
+  amount            Decimal
+  disbursedBy       String
+  disbursementMethod String
+  referenceNumber   String?
+  bankDetails       String?
+  disbursedAt       DateTime
+  createdAt         DateTime @default(now())
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  disbursedByUser   User     @relation(fields: [disbursedBy], references: [id])
+}
+
+model Fee {
+  id                String   @id @default(cuid())
+  name              String
+  type              String
+  calculationType   String
+  amount            Decimal?
+  percentage        Decimal?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  loanFees          LoanFee[]
+}
+
+model LoanFee {
+  id                String   @id @default(cuid())
+  loanId            String
+  feeId             String
+  amount            Decimal
+  isPaid            Boolean  @default(false)
+  paidAmount        Decimal  @default(0)
+  dueDate           DateTime?
+  createdAt         DateTime @default(now())
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  fee               Fee      @relation(fields: [feeId], references: [id])
+}
+
+model Penalty {
+  id                String   @id @default(cuid())
+  loanId            String
+  scheduleId        String?
+  type              String
+  amount            Decimal
+  isPaid            Boolean  @default(false)
+  paidAmount        Decimal  @default(0)
+  reason            String?
+  appliedDate       DateTime @default(now())
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  schedule          LoanSchedule? @relation(fields: [scheduleId], references: [id])
+}
+
+model Notification {
+  id                String   @id @default(cuid())
+  userId            String?
+  type              String
+  category          String
+  title             String
+  message           String
+  status            String   @default("PENDING")
+  sentAt            DateTime?
+  createdAt         DateTime @default(now())
+
+  user              User?    @relation(fields: [userId], references: [id])
+}
+
+model ActivityLog {
+  id                String   @id @default(cuid())
+  userId            String
+  action            String
+  entityType        String?
+  entityId          String?
+  details           String?
+  ipAddress         String?
+  userAgent         String?
+  createdAt         DateTime @default(now())
+
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model Guarantor {
+  id                String   @id @default(cuid())
+  borrowerId        String
+  firstName         String
+  lastName          String
+  email             String?
+  phone             String
+  address           String?
+  relationship      String?
+  idNumber          String?
+  createdAt         DateTime @default(now())
+
+  borrower          Borrower @relation(fields: [borrowerId], references: [id])
+}
+
+model FraudCheck {
+  id                String   @id @default(cuid())
+  borrowerId        String
+  loanId            String?
+  riskScore         Int
+  isSuspicious      Boolean
+  flags             String
+  details           String?
+  checkedAt         DateTime @default(now())
+
+  borrower          Borrower @relation(fields: [borrowerId], references: [id])
+  loan              Loan?    @relation(fields: [loanId], references: [id])
+}
+
+model BorrowerPreference {
+  id                String   @id @default(cuid())
+  borrowerId        String   @unique
+  preferredChannel  String   @default("EMAIL")
+  reminderDaysBefore Int     @default(3)
+  receiveMarketing  Boolean  @default(true)
+
+  borrower          Borrower @relation(fields: [borrowerId], references: [id])
+}
+
+model ReportTemplate {
+  id                String   @id @default(cuid())
+  userId            String
+  name              String
+  reportType        String
+  filters           String
+  fields            String
+  groupBy           String?
+  sortBy            String?
+  chartType         String?
+  isPublic          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model LoanProduct {
+  id                String   @id @default(cuid())
+  name              String   @unique
+  code              String   @unique
+  description       String?
+  minAmount         Decimal
+  maxAmount         Decimal
+  minTerm           Int
+  maxTerm           Int
+  interestRate      Decimal
+  interestType      String   @default("FLAT") // FLAT, REDUCING_BALANCE
+  repaymentFrequency String  @default("MONTHLY")
+  gracePeriodDays   Int      @default(0)
+  lateFeeType       String?  // FIXED, PERCENTAGE
+  lateFeeAmount     Decimal?
+  processingFeeType String?  // FIXED, PERCENTAGE
+  processingFeeAmount Decimal?
+  requiresCollateral Boolean @default(false)
+  requiresGuarantor Boolean @default(false)
+  minCreditScore    Int?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model TwoFactorAuth {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  secret            String
+  backupCodes       String?
+  verifiedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model SystemSetting {
+  id                String   @id @default(cuid())
+  category          String
+  key               String   @unique
+  value             String
+  label             String
+  description       String?
+  type              String   @default("text") // text, number, boolean, json
+  isPublic          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model SignatureRequest {
+  id                String   @id @default(cuid())
+  loanId            String
+  borrowerId        String
+  token             String   @unique
+  documentType      String   @default("LOAN_AGREEMENT")
+  status            String   @default("PENDING") // PENDING, SENT, VIEWED, SIGNED, DECLINED, EXPIRED
+  signatureData     String?
+  signedAt          DateTime?
+  viewedAt          DateTime?
+  expiresAt         DateTime
+  ipAddress         String?
+  userAgent         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  loan              Loan     @relation(fields: [loanId], references: [id])
+  borrower          Borrower @relation(fields: [borrowerId], references: [id])
+}
