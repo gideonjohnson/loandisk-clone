@@ -87,7 +87,7 @@ export const GET = createAuthHandler(
       )
 
       // Return CSV file
-      return new Response(csvContent, {
+      return new NextResponse(csvContent, {
         headers: {
           'Content-Type': 'text/csv',
           'Content-Disposition': `attachment; filename="${filename}"`,
