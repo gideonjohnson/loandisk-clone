@@ -49,3 +49,6 @@ next-env.d.ts
 # temp files
 tmpclaude-*
 nul
+
+.vercel
+.env*.local

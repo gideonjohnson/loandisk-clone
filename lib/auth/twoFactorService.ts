@@ -3,12 +3,26 @@
  * Handles TOTP-based 2FA using authenticator apps
  */
 
-import { authenticator } from 'otplib'
+import * as OTPAuth from 'otpauth'
 import QRCode from 'qrcode'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 
 const APP_NAME = 'Meek Microfinance'
+
+/**
+ * Create a TOTP instance for verification
+ */
+function createTOTP(secret: string, email: string): OTPAuth.TOTP {
+  return new OTPAuth.TOTP({
+    issuer: APP_NAME,
+    label: email,
+    algorithm: 'SHA1',
+    digits: 6,
+    period: 30,
+    secret: OTPAuth.Secret.fromBase32(secret),
+  })
+}
 
 /**
  * Generate a new TOTP secret for a user
@@ -28,10 +42,21 @@ export async function generateTwoFactorSecret(userId: string): Promise<{
   }
 
   // Generate a random secret
-  const secret = authenticator.generateSecret()
+  const secretObj = new OTPAuth.Secret({ size: 20 })
+  const secret = secretObj.base32
+
+  // Create TOTP for URL generation
+  const totp = new OTPAuth.TOTP({
+    issuer: APP_NAME,
+    label: user.email,
+    algorithm: 'SHA1',
+    digits: 6,
+    period: 30,
+    secret: secretObj,
+  })
 
   // Create the otpauth URL for authenticator apps
-  const otpauthUrl = authenticator.keyuri(user.email, APP_NAME, secret)
+  const otpauthUrl = totp.toString()
 
   // Generate QR code as data URL
   const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl)
@@ -89,11 +114,19 @@ export async function verifyAndEnable2FA(
     return { success: false, error: '2FA setup not initiated' }
   }
 
-  // Verify the code
-  const isValid = authenticator.verify({
-    token: code,
-    secret: twoFactorAuth.secret,
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
   })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  // Verify the code
+  const totp = createTOTP(twoFactorAuth.secret, user.email)
+  const delta = totp.validate({ token: code, window: 1 })
+  const isValid = delta !== null
 
   if (!isValid) {
     return { success: false, error: 'Invalid verification code' }
@@ -131,11 +164,19 @@ export async function verifyTwoFactorCode(
     return false
   }
 
-  // First try TOTP verification
-  const isValid = authenticator.verify({
-    token: code,
-    secret: twoFactorAuth.secret,
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
   })
+
+  if (!user) {
+    return false
+  }
+
+  // First try TOTP verification
+  const totp = createTOTP(twoFactorAuth.secret, user.email)
+  const delta = totp.validate({ token: code, window: 1 })
+  const isValid = delta !== null
 
   if (isValid) {
     return true
