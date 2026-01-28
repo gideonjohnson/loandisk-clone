@@ -51,9 +51,7 @@ export function PieChart({
               cx="50%"
               cy="50%"
               outerRadius={80}
-              label={(entry: Record<string, unknown>) =>
-                `${entry[nameKey]}: ${formatValue ? formatValue(entry[dataKey] as number) : entry[dataKey]}`
-              }
+              label={({ name, value }) => `${name}: ${formatValue ? formatValue(value as number) : value}`}
               labelLine={false}
             >
               {data.map((entry, index) => (
