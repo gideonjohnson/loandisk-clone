@@ -183,7 +183,7 @@ export function exportLoanStatement(data: LoanStatementData): Blob {
   y += 6
   doc.text(`Total Amount Paid: $${totalPaid.toLocaleString()}`, 14, y)
   y += 6
-  doc.setFont(undefined, 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.text(`Outstanding Balance: $${outstanding.toLocaleString()}`, 14, y)
 
   return doc.output('blob')
