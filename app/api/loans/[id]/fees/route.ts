@@ -74,8 +74,13 @@ export const POST = createAuthHandler(
       }
 
       // Calculate fee amount if not provided
+      const feeForCalc = {
+        ...fee,
+        amount: fee.amount ? Number(fee.amount) : null,
+        percentage: fee.percentage ? Number(fee.percentage) : null,
+      }
       const feeAmount =
-        amount || applyFeeToLoan(Number(loan.principalAmount), fee)
+        amount || applyFeeToLoan(Number(loan.principalAmount), feeForCalc)
 
       // Create loan fee
       const loanFee = await prisma.loanFee.create({
