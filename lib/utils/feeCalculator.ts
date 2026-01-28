@@ -7,9 +7,9 @@ export interface Fee {
   id: string
   name: string
   type: string
-  calculationType: 'FIXED' | 'PERCENTAGE'
-  amount?: number
-  percentage?: number
+  calculationType: string
+  amount?: number | null
+  percentage?: number | null
 }
 
 export interface PenaltyConfig {
