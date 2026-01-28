@@ -141,8 +141,7 @@ export async function sendPaymentReminders(daysAhead: number = 3): Promise<Remin
     for (const payment of upcomingPayments) {
       const { borrower } = payment.loan
       const borrowerName = `${borrower.firstName} ${borrower.lastName}`
-      const amount = payment.amount.toFixed(2)
-      const dueDate = payment.dueDate.toLocaleDateString()
+      const amount = payment.amount
 
       // Send SMS reminder
       if (borrower.phone) {
@@ -190,7 +189,7 @@ export async function sendPaymentReminders(daysAhead: number = 3): Promise<Remin
           details: JSON.stringify({
             paymentId: payment.id,
             amount,
-            dueDate,
+            dueDate: payment.dueDate.toISOString(),
             smsStatus: borrower.phone ? 'sent' : 'no_phone',
             emailStatus: borrower.email ? 'sent' : 'no_email',
           }),
