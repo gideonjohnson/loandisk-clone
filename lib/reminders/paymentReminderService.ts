@@ -249,12 +249,16 @@ export async function sendOverdueNotices(): Promise<ReminderResult> {
       // Send Email notice
       if (borrower.email) {
         try {
+          // Calculate penalty (simplified - could be enhanced with penalty settings)
+          const penaltyAmount = daysOverdue > 0 ? parseFloat(amount) * 0.05 : 0
+
           await sendPaymentOverdueEmail(
             borrower.email,
             borrowerName,
             parseFloat(amount),
             daysOverdue,
             payment.loan.loanNumber,
+            penaltyAmount,
             payment.loan.id,
             borrower.id
           )
