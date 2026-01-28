@@ -7,10 +7,9 @@ export const createPaymentSchema = z.object({
   paymentMethod: z.enum(["Cash", "Bank Transfer", "Cheque", "M-Pesa", "Airtel Money", "Card"]),
   principalAmount: z.number().min(0, "Principal amount cannot be negative"),
   interestAmount: z.number().min(0, "Interest amount cannot be negative"),
-  feesAmount: z.number().min(0, "Fees amount cannot be negative").optional().default(0),
+  feesAmount: z.number().min(0, "Fees amount cannot be negative").optional(),
   notes: z.string().optional(),
   scheduleId: z.string().optional(),
-  isPaid: z.boolean().optional().default(false),
 }).refine(
   (data) => {
     const total = data.principalAmount + data.interestAmount + (data.feesAmount || 0)
