@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, DollarSign, CreditCard, BarChart3, Settings,
-  LogOut, Wallet, Bell, Menu, X, Building2
+  LogOut, Wallet, Bell, Menu, X, Building2, Briefcase, FileText
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -28,10 +28,12 @@ export default function DashboardLayout({
     { name: 'Borrowers', href: '/dashboard/borrowers', icon: Users },
     { name: 'Loans', href: '/dashboard/loans', icon: DollarSign },
     { name: 'Savings', href: '/dashboard/savings', icon: Wallet },
+    { name: 'Investors', href: '/dashboard/investors', icon: Briefcase },
     { name: 'Payments', href: '/dashboard/payments', icon: CreditCard },
     { name: 'Reminders', href: '/dashboard/reminders', icon: Bell },
     { name: 'Branches', href: '/dashboard/branches', icon: Building2 },
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
+    { name: 'Templates', href: '/dashboard/templates', icon: FileText },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ]
 

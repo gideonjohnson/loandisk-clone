@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight } from 'lucide-react'
+import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight, Bell, Lock } from 'lucide-react'
 
 interface Setting {
   id: string
@@ -65,6 +65,8 @@ export default function SettingsPage() {
     { id: 'email', label: 'Email', icon: Mail },
     { id: 'sms', label: 'SMS', icon: MessageSquare },
     { id: 'loans', label: 'Loan Settings', icon: Percent },
+    { id: 'notifications', label: 'Notifications', icon: Bell, href: '/dashboard/settings/notifications' },
+    { id: 'permissions', label: 'Permissions', icon: Lock, href: '/dashboard/settings/permissions' },
     { id: 'security', label: 'Security', icon: Shield, href: '/dashboard/settings/security' },
   ]
 
