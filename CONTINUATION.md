@@ -1,19 +1,20 @@
-# LoanDisk Clone - Continuation File
-> Last Updated: 2026-01-28
+# Meek - Continuation File
+> Last Updated: 2026-01-31
 
 ## Project Overview
-A microfinance loan management system cloning loandisk.com features.
+A comprehensive microfinance loan management system.
 
 ## Tech Stack
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Database**: SQLite with Prisma ORM
+- **Database**: PostgreSQL (Neon) with Prisma ORM
 - **Auth**: NextAuth.js
 - **UI**: Tailwind CSS, Lucide icons, Recharts
+- **Documents**: docx library for DOCX generation
 
 ## Current State: DEPLOYED TO VERCEL ✅
-- **Production URL**: https://loandisk-clone.vercel.app
-- **GitHub Repo**: https://github.com/gideonjohnson/loandisk-clone
+- **Production URL**: https://meek.vercel.app
+- **GitHub Repo**: https://github.com/gideonjohnson/meek
 - Dev server runs on `http://localhost:3000`
 - 29 tests passing
 - Database seeded with test data (local only)
@@ -116,9 +117,79 @@ A microfinance loan management system cloning loandisk.com features.
 2. Set Vercel environment variables:
    - `DATABASE_URL` - Production database URL
    - `NEXTAUTH_SECRET` - Secure secret
-   - `NEXTAUTH_URL` - `https://loandisk-clone.vercel.app`
+   - `NEXTAUTH_URL` - `https://meek.vercel.app`
    - Optional: `SMS_PROVIDER`, `EMAIL_PROVIDER` configs
 3. Run database migrations and seed
+
+### New Features Added (This Session)
+
+#### Rebranding to Meek
+- Removed all "loandisk" references
+- Updated emails to `@meek.com`
+- Updated documentation and config
+
+#### PostgreSQL + Neon Database
+- Migrated from SQLite to PostgreSQL
+- Connected to Neon cloud database (MeekLoan project)
+- Production database synced and seeded
+
+#### Automated Reminders (Cron Jobs)
+- `vercel.json` configured with cron schedules
+- Daily payment reminders at 8 AM UTC
+- Overdue notifications at 9 AM UTC
+
+#### Aging/Collection Report
+- Portfolio at Risk (PAR) analysis
+- Aging buckets: Current, 1-30, 31-60, 61-90, 91-180, 180+ days
+- Overdue loans breakdown with contact info
+- Charts and CSV export
+- `/dashboard/reports/aging`
+
+#### Investor Accounts
+- Full investor management (CRUD)
+- Investment accounts with interest tracking
+- Deposits/withdrawals/interest credits
+- Transaction history
+- `/dashboard/investors`
+
+**New Models:**
+- Investor
+- InvestorAccount
+- InvestorTransaction
+
+#### Document Templates (DOCX) ✅
+- Template management UI at `/dashboard/templates`
+- Create/edit templates with markdown-like syntax
+- Placeholder system: `{{borrower_name}}`, `{{loan_amount}}`, etc.
+- Categories: borrower, loan, payment, collateral, date
+- DOCX generation using `docx` library
+- Preview and download filled documents
+- **Files created**:
+  - `lib/documents/templateService.ts`
+  - `app/api/templates/route.ts`
+  - `app/api/templates/generate/route.ts`
+  - `app/dashboard/templates/page.tsx`
+
+#### Granular Permissions ✅
+- Role-based permission management at `/dashboard/settings/permissions`
+- Permission categories: Borrowers, Loans, Payments, Fees, Documents, Collateral, Accounts, Reports, Admin, Notifications
+- Visual permission grid with toggle buttons
+- Roles: Admin, Manager, Branch Manager, Operations Manager, Loan Officer, Cashier, Teller, Collector, Accountant
+- Admin always has all permissions (cannot be modified)
+- Stored in SystemSetting table as JSON
+- **Files created**:
+  - `app/api/settings/permissions/route.ts`
+  - `app/dashboard/settings/permissions/page.tsx`
+
+#### SMS/Email Integration Settings ✅
+- Notification settings UI at `/dashboard/settings/notifications`
+- Email providers: SMTP (nodemailer), SendGrid
+- SMS providers: Twilio, Africa's Talking
+- Provider configuration with API keys, sender IDs
+- Provider enable/disable toggles
+- **Dependencies added**: `nodemailer`, `@sendgrid/mail`, `docx`
+- **Files created**:
+  - `app/dashboard/settings/notifications/page.tsx`
 
 ## Pending Features (Future Enhancements)
 
@@ -189,9 +260,9 @@ TwoFactorAuth - 2FA secrets and backup codes
 ```
 
 ## Notes
-- SQLite database at `prisma/dev.db`
-- For production: Switch to PostgreSQL
-- External services (SMS, Email) are stubbed - need real providers
+- Production database: Neon PostgreSQL (MeekLoan project)
+- Database URL configured via Vercel environment variables
+- Email/SMS providers configurable via Settings > Notifications
 
 ## Resume Instructions
 1. Read this file first
