@@ -8,7 +8,7 @@ import { Permission } from '@/lib/permissions'
  * Get all system settings
  */
 export const GET = createAuthHandler(
-  async (request: Request) => {
+  async (_request: Request) => {
     try {
       const settings = await prisma.systemSetting.findMany({
         orderBy: [{ category: 'asc' }, { key: 'asc' }],
@@ -45,7 +45,7 @@ export const PUT = createAuthHandler(
 
       // Upsert each setting
       const updates = await Promise.all(
-        settings.map((setting: any) =>
+        settings.map((setting: { key: string; value: string; label?: string; category?: string; description?: string; type?: string }) =>
           prisma.systemSetting.upsert({
             where: { key: setting.key },
             update: { value: setting.value },
@@ -102,9 +102,9 @@ export const POST = createAuthHandler(
       })
 
       return NextResponse.json({ setting }, { status: 201 })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Create setting error:', error)
-      if (error.code === 'P2002') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
         return NextResponse.json(
           { error: 'A setting with this key already exists' },
           { status: 400 }

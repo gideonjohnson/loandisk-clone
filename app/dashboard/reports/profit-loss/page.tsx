@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft, TrendingUp, TrendingDown, DollarSign,
-  Calendar, Building2, Download, BarChart3, PieChart
+  Calendar, Download, BarChart3
 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -56,8 +56,6 @@ interface ReportData {
   generatedAt: string
 }
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
-
 export default function ProfitLossReportPage() {
   const [data, setData] = useState<ReportData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -86,6 +84,7 @@ export default function ProfitLossReportPage() {
 
   useEffect(() => {
     fetchReport()
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   }, [year, periodType, branchId])
 
   const formatCurrency = (amount: number) => {

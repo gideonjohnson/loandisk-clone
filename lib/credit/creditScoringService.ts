@@ -23,6 +23,31 @@ interface CreditReport {
   interestRateAdjustment: number
 }
 
+// Allow Prisma Decimal type
+type DecimalLike = number | string | { toNumber?: () => number }
+
+interface LoanSchedule {
+  lateDays: number
+}
+
+interface Loan {
+  id: string
+  status: string
+  principalAmount: DecimalLike
+  createdAt: Date | string
+  schedules: LoanSchedule[]
+  payments: unknown[]
+}
+
+interface BorrowerWithLoans {
+  id: string
+  monthlyIncome: DecimalLike | null
+  createdAt: Date | string
+  employmentStatus: string | null
+  kycVerified: boolean
+  loans: Loan[]
+}
+
 /**
  * Calculate credit score for a borrower
  */
@@ -90,7 +115,7 @@ export async function calculateCreditScore(borrowerId: string): Promise<CreditRe
   }
 }
 
-async function calculateFactors(borrower: any): Promise<CreditFactors> {
+async function calculateFactors(borrower: BorrowerWithLoans): Promise<CreditFactors> {
   const loans = borrower.loans || []
 
   // Payment History (35% weight)
@@ -115,8 +140,8 @@ async function calculateFactors(borrower: any): Promise<CreditFactors> {
 
   // Credit Utilization (existing debt vs capacity)
   let creditUtilization = 100
-  const activeLoans = loans.filter((l: any) => l.status === 'ACTIVE')
-  const totalDebt = activeLoans.reduce((sum: number, l: any) => sum + Number(l.principalAmount), 0)
+  const activeLoans = loans.filter((l) => l.status === 'ACTIVE')
+  const totalDebt = activeLoans.reduce((sum: number, l) => sum + Number(l.principalAmount), 0)
   const monthlyIncome = Number(borrower.monthlyIncome) || 1
   const debtToIncome = totalDebt / (monthlyIncome * 12)
 
@@ -142,7 +167,7 @@ async function calculateFactors(borrower: any): Promise<CreditFactors> {
   const sixMonthsAgo = new Date()
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
   const recentLoans = loans.filter(
-    (l: any) => new Date(l.createdAt) > sixMonthsAgo
+    (l) => new Date(l.createdAt) > sixMonthsAgo
   ).length
   if (recentLoans >= 5) recentInquiries = 30
   else if (recentLoans >= 3) recentInquiries = 60

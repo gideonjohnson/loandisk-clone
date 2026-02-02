@@ -281,7 +281,7 @@ export default function SecuritySettingsPage() {
               Save Your Backup Codes
             </CardTitle>
             <CardDescription className="text-amber-700">
-              Store these codes safely. You'll need them if you lose access to your authenticator app.
+              Store these codes safely. You&apos;ll need them if you lose access to your authenticator app.
               Each code can only be used once.
             </CardDescription>
           </CardHeader>
@@ -308,7 +308,7 @@ export default function SecuritySettingsPage() {
                 onClick={() => setShowBackupCodes(false)}
                 className="ml-auto"
               >
-                I've Saved These Codes
+                I&apos;ve Saved These Codes
               </Button>
             </div>
           </CardContent>
@@ -411,7 +411,7 @@ export default function SecuritySettingsPage() {
                 <div className="flex-1">
                   <h3 className="font-medium">Or Enter Manually</h3>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Can't scan? Enter this code manually in your authenticator app:
+                    Can&apos;t scan? Enter this code manually in your authenticator app:
                   </p>
                   <div className="flex items-center gap-2">
                     <code className="px-3 py-2 bg-gray-100 rounded-lg font-mono text-sm">
@@ -471,7 +471,7 @@ export default function SecuritySettingsPage() {
                   <div>
                     <h3 className="font-medium text-red-800">Disable Two-Factor Authentication?</h3>
                     <p className="text-sm text-red-700 mt-1">
-                      This will make your account less secure. You'll only need your password to sign in.
+                      This will make your account less secure. You&apos;ll only need your password to sign in.
                     </p>
                   </div>
                 </div>

@@ -9,7 +9,7 @@ import { exportPortfolioToExcel } from '@/lib/reports/excelExport'
  * Generate portfolio report
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const branchId = searchParams.get('branchId') || undefined

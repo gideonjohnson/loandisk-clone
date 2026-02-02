@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createAuthHandler } from '@/lib/middleware/withAuth'
-import { Permission } from '@/lib/permissions'
 import { createSavingsAccount, getAllAccounts } from '@/lib/savings/savingsService'
 
 /**
@@ -8,7 +7,7 @@ import { createSavingsAccount, getAllAccounts } from '@/lib/savings/savingsServi
  * Get all savings accounts
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const accountType = searchParams.get('accountType') || undefined
@@ -44,7 +43,7 @@ export const GET = createAuthHandler(
  * Create a new savings account
  */
 export const POST = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const body = await request.json()
       const { borrowerId, accountType, interestRate, initialDeposit } = body

@@ -17,9 +17,16 @@ import { useToast } from '@/hooks/use-toast'
 import { Upload, File, X, CheckCircle } from 'lucide-react'
 import { formatFileSize } from '@/lib/upload/fileUpload'
 
+interface UploadedDocument {
+  id: string
+  fileName: string
+  fileUrl: string
+  type: string
+}
+
 interface DocumentUploadProps {
   loanId?: string
-  onUploadComplete?: (documents: any[]) => void
+  onUploadComplete?: (documents: UploadedDocument[]) => void
 }
 
 export function DocumentUpload({ loanId, onUploadComplete }: DocumentUploadProps) {
@@ -70,7 +77,7 @@ export function DocumentUpload({ loanId, onUploadComplete }: DocumentUploadProps
     }
 
     setIsUploading(true)
-    const uploadedDocs: any[] = []
+    const uploadedDocs: UploadedDocument[] = []
 
     try {
       // Step 1: Upload files to storage

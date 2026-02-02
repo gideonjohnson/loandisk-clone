@@ -124,7 +124,7 @@ export async function getAllAccounts(params?: {
   limit?: number
   offset?: number
 }) {
-  const where: any = {}
+  const where: { accountType?: string; active?: boolean } = {}
 
   if (params?.accountType) {
     where.accountType = params.accountType

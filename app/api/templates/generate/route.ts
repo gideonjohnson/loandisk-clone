@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       // Generate DOCX
       const buffer = await generateDocument(templateContent, data)
 
-      return new NextResponse(buffer, {
+      return new NextResponse(new Uint8Array(buffer), {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'Content-Disposition': `attachment; filename="${templateName.replace(/\s+/g, '_')}_${data['{{loan_number}}']}.docx"`,

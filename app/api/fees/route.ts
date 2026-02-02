@@ -8,7 +8,7 @@ import { Permission } from '@/lib/permissions'
  * Get all fee types
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const activeOnly = searchParams.get('active') === 'true'

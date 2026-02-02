@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Download, Phone, Mail, TrendingUp, Users, DollarSign, Calendar } from 'lucide-react'
+import { AlertTriangle, Download, Phone, Mail, TrendingUp, Users, DollarSign } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
 interface AgingBucket {
@@ -55,6 +55,7 @@ export default function AgingReportPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchFilter])
 
   const fetchData = async () => {

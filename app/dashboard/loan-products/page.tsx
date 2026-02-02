@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Edit, Trash2, Package } from 'lucide-react'
+import { Plus, Edit, Package } from 'lucide-react'
 
 interface LoanProduct {
   id: string

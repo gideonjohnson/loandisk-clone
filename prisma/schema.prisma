@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
@@ -459,4 +459,62 @@ model SignatureRequest {
 
   loan              Loan     @relation(fields: [loanId], references: [id])
   borrower          Borrower @relation(fields: [borrowerId], references: [id])
+}
+
+model Investor {
+  id                String   @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String   @unique
+  phone             String
+  address           String?
+  city              String?
+  country           String?
+  idNumber          String?  @unique
+  taxId             String?
+  bankName          String?
+  bankAccount       String?
+  bankBranch        String?
+  notes             String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  accounts          InvestorAccount[]
+  transactions      InvestorTransaction[]
+}
+
+model InvestorAccount {
+  id                String   @id @default(cuid())
+  accountNumber     String   @unique
+  investorId        String
+  accountType       String   @default("INVESTMENT") // INVESTMENT, SAVINGS
+  principalAmount   Decimal  @default(0)
+  interestRate      Decimal  @default(0)
+  interestEarned    Decimal  @default(0)
+  maturityDate      DateTime?
+  status            String   @default("ACTIVE") // ACTIVE, MATURED, WITHDRAWN, CLOSED
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  investor          Investor @relation(fields: [investorId], references: [id])
+  transactions      InvestorTransaction[]
+}
+
+model InvestorTransaction {
+  id                String   @id @default(cuid())
+  investorId        String
+  accountId         String
+  type              String   // DEPOSIT, WITHDRAWAL, INTEREST_CREDIT, FEE
+  amount            Decimal
+  balanceBefore     Decimal
+  balanceAfter      Decimal
+  description       String?
+  referenceNumber   String?
+  processedBy       String?
+  transactionDate   DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  investor          Investor @relation(fields: [investorId], references: [id])
+  account           InvestorAccount @relation(fields: [accountId], references: [id])
 }

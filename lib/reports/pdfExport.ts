@@ -2,6 +2,13 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 
+// Extend jsPDF type to include autoTable properties
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable?: {
+    finalY: number
+  }
+}
+
 /**
  * PDF Export Utility
  * Generate PDFs for loans, reports, and statements
@@ -139,7 +146,8 @@ export function exportLoanStatement(data: LoanStatementData): Blob {
 
   // Payment History
   if (data.payments.length > 0) {
-    y = (doc as any).lastAutoTable.finalY + 12
+    y = (doc as jsPDFWithAutoTable).lastAutoTable?.finalY ?? y
+    y += 12
 
     doc.setFontSize(14)
     doc.text('Payment History', 14, y)
@@ -172,7 +180,8 @@ export function exportLoanStatement(data: LoanStatementData): Blob {
   )
   const outstanding = totalDue - totalPaid
 
-  y = (doc as any).lastAutoTable.finalY + 12
+  y = (doc as jsPDFWithAutoTable).lastAutoTable?.finalY ?? y
+  y += 12
 
   doc.setFontSize(12)
   doc.text('Summary', 14, y)
@@ -280,7 +289,7 @@ export function exportPaymentReceipt(payment: {
  */
 export function exportReportToPDF(
   title: string,
-  data: any[][],
+  data: (string | number)[][],
   headers: string[]
 ): Blob {
   const doc = new jsPDF()

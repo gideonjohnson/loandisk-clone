@@ -3,7 +3,9 @@
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Loader2, Eye, EyeOff } from 'lucide-react'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Shield, Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 
 export default function SignIn() {
   const router = useRouter()
@@ -23,7 +25,6 @@ export default function SignIn() {
 
     try {
       if (requires2FA && pendingUserId) {
-        // Verify 2FA code
         const verifyRes = await fetch('/api/auth/2fa/login-verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -41,7 +42,6 @@ export default function SignIn() {
           return
         }
 
-        // 2FA verified, now complete login
         const result = await signIn('credentials', {
           email,
           password,
@@ -56,7 +56,6 @@ export default function SignIn() {
           router.refresh()
         }
       } else {
-        // First step: check credentials and 2FA requirement
         const checkRes = await fetch('/api/auth/check-2fa', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -72,14 +71,12 @@ export default function SignIn() {
         }
 
         if (checkData.requires2FA) {
-          // User has 2FA enabled, show 2FA input
           setRequires2FA(true)
           setPendingUserId(checkData.userId)
           setLoading(false)
           return
         }
 
-        // No 2FA, proceed with normal login
         const result = await signIn('credentials', {
           email,
           password,
@@ -93,7 +90,7 @@ export default function SignIn() {
           router.refresh()
         }
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -108,88 +105,119 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Meek Microfinance
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Loan Management System
+    <div className="min-h-screen bg-gradient-to-br from-[#4169E1] to-[#2a4494] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full"
+      >
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-xl"
+            >
+              <span className="text-[#4169E1] font-bold text-3xl">M</span>
+            </motion.div>
+          </Link>
+          <h1 className="text-3xl font-bold text-white">
+            Welcome Back
+          </h1>
+          <p className="mt-2 text-white/80">
+            Sign in to Meek Loan Management
           </p>
         </div>
 
-        {requires2FA ? (
-          <div className="mt-8 space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <Shield className="h-6 w-6 text-blue-600" />
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-2xl p-8"
+        >
+          {requires2FA ? (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-[#4169E1]" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Two-Factor Authentication</h3>
+                    <p className="text-sm text-gray-500">
+                      Enter the 6-digit code from your authenticator app
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <h3 className="font-medium text-blue-900">Two-Factor Authentication</h3>
-                  <p className="text-sm text-blue-700">
-                    Enter the 6-digit code from your authenticator app
+                  <label htmlFor="twoFactorCode" className="block text-sm font-medium text-gray-700 mb-2">
+                    Verification Code
+                  </label>
+                  <input
+                    id="twoFactorCode"
+                    name="twoFactorCode"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    maxLength={8}
+                    value={twoFactorCode}
+                    onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9-]/g, ''))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl text-center text-2xl font-mono tracking-widest focus:ring-2 focus:ring-[#4169E1] focus:border-[#4169E1] transition-all"
+                    placeholder="000000"
+                    autoFocus
+                  />
+                  <p className="mt-2 text-xs text-gray-500 text-center">
+                    You can also use a backup code
                   </p>
                 </div>
-              </div>
-            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="twoFactorCode" className="block text-sm font-medium text-gray-700 mb-1">
-                  Verification Code
-                </label>
-                <input
-                  id="twoFactorCode"
-                  name="twoFactorCode"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  required
-                  maxLength={8}
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9-]/g, ''))}
-                  className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-400 text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="000000"
-                  autoFocus
-                />
-                <p className="mt-2 text-xs text-gray-500 text-center">
-                  You can also use a backup code
-                </p>
-              </div>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-xl p-3"
+                  >
+                    {error}
+                  </motion.div>
+                )}
 
-              {error && (
-                <div className="text-red-500 text-sm text-center bg-red-50 border border-red-200 rounded-lg p-2">
-                  {error}
+                <div className="flex gap-3">
+                  <motion.button
+                    type="button"
+                    onClick={handleBack}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    disabled={loading || twoFactorCode.length < 6}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 flex justify-center items-center py-3 px-4 rounded-xl text-sm font-medium text-white bg-[#4169E1] hover:bg-[#3457c9] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      'Verify'
+                    )}
+                  </motion.button>
                 </div>
-              )}
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || twoFactorCode.length < 6}
-                  className="flex-1 flex justify-center items-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    'Verify'
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+              </form>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email address
                 </label>
                 <input
@@ -200,12 +228,12 @@ export default function SignIn() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-lg placeholder:text-gray-400 focus:ring-2 focus:ring-[#4169E1] focus:border-[#4169E1] transition-all"
                   placeholder="you@example.com"
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -217,13 +245,13 @@ export default function SignIn() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl text-lg placeholder:text-gray-400 focus:ring-2 focus:ring-[#4169E1] focus:border-[#4169E1] transition-all"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -233,35 +261,53 @@ export default function SignIn() {
                   </button>
                 </div>
               </div>
-            </div>
 
-            {error && (
-              <div className="text-red-500 text-sm text-center bg-red-50 border border-red-200 rounded-lg p-2">
-                {error}
-              </div>
-            )}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded-xl p-3"
+                >
+                  {error}
+                </motion.div>
+              )}
 
-            <div>
-              <button
+              <motion.button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full flex justify-center py-3 px-4 rounded-xl text-base font-semibold text-white bg-[#4169E1] hover:bg-[#3457c9] shadow-lg shadow-blue-500/25 disabled:opacity-50 transition-all"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   'Sign in'
                 )}
-              </button>
-            </div>
+              </motion.button>
 
-            <div className="text-center text-sm text-gray-600">
-              <p>Demo credentials:</p>
-              <p className="font-mono text-xs mt-1">admin@loandisk.com / admin123</p>
-            </div>
-          </form>
-        )}
-      </div>
+              <div className="pt-4 border-t text-center">
+                <p className="text-sm text-gray-500 mb-2">Demo credentials:</p>
+                <p className="font-mono text-xs text-gray-700 bg-gray-100 rounded-lg py-2 px-3 inline-block">
+                  admin@meek.com / admin123
+                </p>
+              </div>
+            </form>
+          )}
+        </motion.div>
+
+        {/* Footer link */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-6 text-center"
+        >
+          <Link href="/" className="text-white/80 hover:text-white text-sm transition-colors">
+            &larr; Back to home
+          </Link>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

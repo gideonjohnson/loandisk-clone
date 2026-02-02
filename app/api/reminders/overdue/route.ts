@@ -8,7 +8,7 @@ import { sendOverdueNotices, getOverduePayments } from '@/lib/reminders/paymentR
  * Get list of overdue payments
  */
 export const GET = createAuthHandler(
-  async (request: Request) => {
+  async (_request: Request) => {
     try {
       const payments = await getOverduePayments()
 
@@ -52,7 +52,7 @@ export const GET = createAuthHandler(
  * Send notices for overdue payments
  */
 export const POST = createAuthHandler(
-  async (request: Request) => {
+  async (_request: Request) => {
     try {
       const result = await sendOverdueNotices()
 

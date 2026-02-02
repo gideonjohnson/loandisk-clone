@@ -10,7 +10,7 @@ import { subMonths, startOfMonth, endOfMonth } from 'date-fns'
  * Generate cash flow report
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const startDateParam = searchParams.get('startDate')

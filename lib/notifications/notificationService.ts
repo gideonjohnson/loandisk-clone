@@ -144,7 +144,7 @@ export async function getUserNotifications(
   limit: number = 20,
   includeRead: boolean = true
 ) {
-  const where: any = { userId }
+  const where: { userId: string; status?: string } = { userId }
 
   if (!includeRead) {
     where.status = 'UNREAD'

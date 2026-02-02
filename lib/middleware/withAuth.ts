@@ -1,7 +1,11 @@
-import { getServerSession } from 'next-auth'
+import { getServerSession, Session } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { Permission, UserRole, hasPermission, hasAllPermissions } from '@/lib/permissions'
+
+interface RouteContext {
+  params: Record<string, string>
+}
 
 /**
  * Middleware to protect API routes with authentication and permission checks
@@ -15,8 +19,8 @@ export function withAuth(
 ) {
   return async function middleware(
     request: Request,
-    context: any,
-    handler: (request: Request, session: any, context: any) => Promise<NextResponse>
+    context: RouteContext,
+    handler: (request: Request, session: Session, context: RouteContext) => Promise<NextResponse>
   ) {
     try {
       // Get the current session
@@ -81,13 +85,13 @@ export function withAuth(
  * @param requireAll Whether all permissions are required
  */
 export function createAuthHandler(
-  handler: (request: Request, session: any, context: any) => Promise<NextResponse>,
+  handler: (request: Request, session: Session, context: RouteContext) => Promise<NextResponse>,
   requiredPermissions: Permission[] = [],
   requireAll: boolean = false
 ) {
   const middleware = withAuth(requiredPermissions, requireAll)
 
-  return async (request: Request, context: any = {}) => {
+  return async (request: Request, context: RouteContext = { params: {} }) => {
     return middleware(request, context, handler)
   }
 }

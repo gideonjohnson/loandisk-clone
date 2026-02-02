@@ -89,9 +89,9 @@ export const PATCH = createAuthHandler(
       })
 
       return NextResponse.json({ user })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update user error:', error)
-      if (error.code === 'P2025') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
         return NextResponse.json(
           { error: 'User not found' },
           { status: 404 }
@@ -129,9 +129,9 @@ export const DELETE = createAuthHandler(
       })
 
       return NextResponse.json({ success: true, user })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Delete user error:', error)
-      if (error.code === 'P2025') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
         return NextResponse.json(
           { error: 'User not found' },
           { status: 404 }

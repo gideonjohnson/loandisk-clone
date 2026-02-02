@@ -43,7 +43,7 @@ export async function POST(request: Request) {
  * GET /api/reminders/run
  * Get reminder statistics
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const stats = await getReminderStats()
 

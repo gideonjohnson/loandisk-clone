@@ -9,8 +9,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis,
-  PolarRadiusAxis, Radar
+  ResponsiveContainer
 } from 'recharts'
 
 interface EmployeePerformance {
@@ -102,6 +101,7 @@ export default function EmployeePerformanceReportPage() {
 
   useEffect(() => {
     fetchReport()
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   }, [startDate, endDate, branchId, commissionRate])
 
   const formatCurrency = (amount: number) => {

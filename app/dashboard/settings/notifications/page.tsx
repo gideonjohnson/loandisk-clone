@@ -168,7 +168,7 @@ export default function NotificationSettingsPage() {
             <label className="block text-sm font-medium mb-1">Email Provider</label>
             <select
               value={settings.emailProvider}
-              onChange={(e) => setSettings({ ...settings, emailProvider: e.target.value as any })}
+              onChange={(e) => setSettings({ ...settings, emailProvider: e.target.value as NotificationSettings['emailProvider'] })}
               className="w-full px-3 py-2 border rounded-lg"
             >
               <option value="mock">Mock (Development)</option>
@@ -294,7 +294,7 @@ export default function NotificationSettingsPage() {
             <label className="block text-sm font-medium mb-1">SMS Provider</label>
             <select
               value={settings.smsProvider}
-              onChange={(e) => setSettings({ ...settings, smsProvider: e.target.value as any })}
+              onChange={(e) => setSettings({ ...settings, smsProvider: e.target.value as NotificationSettings['smsProvider'] })}
               className="w-full px-3 py-2 border rounded-lg"
             >
               <option value="mock">Mock (Development)</option>

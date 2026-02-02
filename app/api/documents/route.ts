@@ -8,13 +8,13 @@ import { Permission } from '@/lib/permissions'
  * Get all documents with optional filters
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const loanId = searchParams.get('loanId')
       const type = searchParams.get('type')
 
-      const where: any = {}
+      const where: Record<string, string> = {}
 
       if (loanId) {
         where.loanId = loanId

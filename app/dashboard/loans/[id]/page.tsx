@@ -23,8 +23,75 @@ import {
   Eye,
   AlertCircle,
   Loader2,
+  LucideIcon,
 } from 'lucide-react'
 import { format } from 'date-fns'
+
+interface LoanBorrower {
+  firstName: string
+  lastName: string
+  email?: string | null
+  phone?: string | null
+  monthlyIncome?: number | null
+  creditScore?: number | null
+}
+
+interface LoanOfficer {
+  name: string
+  email: string
+}
+
+interface LoanDisbursement {
+  id: string
+  amount: number
+  disbursementMethod: string
+  referenceNumber: string | null
+  bankDetails: string | null
+  disbursedAt: Date
+  disbursedByUser: {
+    name: string
+    role: string
+  }
+}
+
+interface LoanApproval {
+  id: string
+  level: number
+  status: string
+  comments?: string | null
+  createdAt: string
+  approvedBy: {
+    name: string
+    role: string
+  }
+}
+
+interface LoanData {
+  id: string
+  loanNumber: string
+  status: string
+  principalAmount: number
+  interestRate: number
+  termMonths: number
+  purpose?: string | null
+  createdAt: string
+  startDate: string
+  endDate: string
+  disbursementDate?: string | null
+  borrowerId: string
+  borrower?: LoanBorrower
+  approvalLevel: number
+  requiredApprovals: number
+  approvalDate?: Date | null
+  rejectionReason?: string | null
+  approvals?: LoanApproval[]
+  outstandingBalance?: number
+  totalRepaid?: number
+  schedule?: Array<{ id: string; dueDate: string; amount: number; status: string }>
+  disbursement?: LoanDisbursement
+  loanOfficer?: LoanOfficer
+  notes?: string | null
+}
 
 interface SignatureRequest {
   id: string
@@ -47,7 +114,7 @@ interface LoanDetailPageProps {
 }
 
 export default function LoanDetailPage({ params }: LoanDetailPageProps) {
-  const [loan, setLoan] = useState<any>(null)
+  const [loan, setLoan] = useState<LoanData | null>(null)
   const [signatures, setSignatures] = useState<SignatureRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [requestingSignature, setRequestingSignature] = useState(false)
@@ -131,7 +198,7 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
   }
 
   const getSignatureStatusBadge = (status: string) => {
-    const config: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any; label: string }> = {
+    const config: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: LucideIcon; label: string }> = {
       PENDING: { variant: 'outline', icon: Clock, label: 'Pending' },
       SENT: { variant: 'secondary', icon: Clock, label: 'Sent' },
       VIEWED: { variant: 'secondary', icon: Eye, label: 'Viewed' },
@@ -177,7 +244,7 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, string> = {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       PENDING: 'outline',
       APPROVED: 'default',
       ACTIVE: 'default',
@@ -193,7 +260,7 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
     }
 
     return (
-      <Badge variant={variants[status] as any} className={colors[status]}>
+      <Badge variant={variants[status] || 'outline'} className={colors[status]}>
         {status}
       </Badge>
     )
@@ -346,8 +413,28 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
 
       {/* Approval Workflow */}
       <div className="grid gap-6 md:grid-cols-2">
-        <LoanApprovalCard loan={loan} onApprovalChange={fetchLoan} />
-        <LoanDisbursementForm loan={loan} onDisbursementComplete={fetchLoan} />
+        <LoanApprovalCard
+          loan={{
+            id: loan.id,
+            loanNumber: loan.loanNumber,
+            status: loan.status,
+            approvalLevel: loan.approvalLevel,
+            requiredApprovals: loan.requiredApprovals,
+            approvalDate: loan.approvalDate ?? null,
+            rejectionReason: loan.rejectionReason ?? null,
+          }}
+          onApprovalChange={fetchLoan}
+        />
+        <LoanDisbursementForm
+          loan={{
+            id: loan.id,
+            loanNumber: loan.loanNumber,
+            principalAmount: loan.principalAmount,
+            status: loan.status,
+            disbursement: loan.disbursement,
+          }}
+          onDisbursementComplete={fetchLoan}
+        />
       </div>
 
       {/* E-Signature Section */}
@@ -384,7 +471,7 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
             <div className="text-center py-8 text-muted-foreground">
               <Pen className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No signature requests yet</p>
-              <p className="text-sm">Click "Request Signature" to generate a signing link</p>
+              <p className="text-sm">Click &quot;Request Signature&quot; to generate a signing link</p>
             </div>
           ) : (
             <div className="space-y-4">

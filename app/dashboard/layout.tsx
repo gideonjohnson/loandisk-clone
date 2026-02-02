@@ -9,6 +9,7 @@ import {
   LogOut, Wallet, Bell, Menu, X, Building2, Briefcase, FileText
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
 
 export default function DashboardLayout({
   children,
@@ -39,14 +40,31 @@ export default function DashboardLayout({
 
   const closeSidebar = () => setSidebarOpen(false)
 
+  // Generate breadcrumb items from pathname
+  const getBreadcrumbItems = () => {
+    const segments = pathname.split('/').filter(Boolean)
+    if (segments.length <= 1) return []
+
+    return segments.slice(1).map((segment, index) => {
+      const href = '/' + segments.slice(0, index + 2).join('/')
+      const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
+      return { label, href }
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-gray-900 h-16 flex items-center justify-between px-4">
-        <h1 className="text-xl font-bold text-white">Meek</h1>
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[hsl(210_10%_23%)] h-16 flex items-center justify-between px-4 shadow-pylon-nav">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-[10px] flex items-center justify-center">
+            <span className="text-white font-display font-bold">M</span>
+          </div>
+          <span className="font-display font-semibold text-white">Meek</span>
+        </div>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-gray-300 hover:text-white focus:outline-none"
+          className="p-2 text-white/70 hover:text-white focus:outline-none transition-colors"
           aria-label="Toggle menu"
         >
           {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -56,24 +74,29 @@ export default function DashboardLayout({
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-30 bg-black bg-opacity-50"
+          className="lg:hidden fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
           onClick={closeSidebar}
         />
       )}
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-40 w-64 bg-[hsl(210_10%_23%)] transform transition-transform duration-300 ease-in-out
         lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-6 bg-gray-800">
-            <h1 className="text-xl font-bold text-white">Meek</h1>
+          <div className="flex h-16 items-center justify-between px-6 bg-[hsl(210_10%_18%)]">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-[10px] flex items-center justify-center">
+                <span className="text-white font-display font-bold">M</span>
+              </div>
+              <span className="font-display font-semibold text-white">Meek</span>
+            </div>
             <button
               onClick={closeSidebar}
-              className="lg:hidden p-1 text-gray-300 hover:text-white"
+              className="lg:hidden p-1 text-white/70 hover:text-white transition-colors"
               aria-label="Close menu"
             >
               <X className="h-5 w-5" />
@@ -91,11 +114,11 @@ export default function DashboardLayout({
                   href={item.href}
                   onClick={closeSidebar}
                   className={`
-                    flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                    active:scale-95 touch-manipulation
+                    flex items-center px-4 py-3 text-sm font-medium rounded-[10px] transition-all
+                    active:scale-[0.98] touch-manipulation
                     ${isActive
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      ? 'bg-primary text-white shadow-pylon-sm'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
                     }
                   `}
                 >
@@ -107,17 +130,22 @@ export default function DashboardLayout({
           </nav>
 
           {/* User info */}
-          <div className="border-t border-gray-800 p-4">
+          <div className="border-t border-white/10 p-4">
             <div className="flex items-center">
-              <div className="flex-1 min-w-0">
+              <div className="w-10 h-10 bg-primary/20 rounded-[10px] flex items-center justify-center">
+                <span className="text-white font-display font-semibold">
+                  {session?.user?.name?.charAt(0) || 'U'}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0 ml-3">
                 <p className="text-sm font-medium text-white truncate">
                   {session?.user?.name}
                 </p>
-                <p className="text-xs text-gray-400 truncate">{session?.user?.role}</p>
+                <p className="text-xs text-white/50 truncate">{session?.user?.role}</p>
               </div>
               <button
                 onClick={() => signOut()}
-                className="ml-2 p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 touch-manipulation"
+                className="ml-2 p-2 text-white/50 hover:text-white rounded-[10px] hover:bg-white/10 touch-manipulation transition-all"
                 title="Sign out"
               >
                 <LogOut className="h-5 w-5" />
@@ -131,6 +159,12 @@ export default function DashboardLayout({
       <div className="lg:pl-64">
         {/* Spacer for mobile header */}
         <div className="h-16 lg:hidden" />
+
+        {/* Breadcrumb navigation */}
+        <div className="bg-white border-b px-4 sm:px-6 lg:px-8 py-3">
+          <Breadcrumb items={getBreadcrumbItems()} homeHref="/dashboard" />
+        </div>
+
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>

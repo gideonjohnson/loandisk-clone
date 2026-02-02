@@ -9,7 +9,7 @@ import { prisma } from '@/lib/prisma'
  * Request a signature for a loan document
  */
 export const POST = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const body = await request.json()
       const { loanId, documentUrl } = body

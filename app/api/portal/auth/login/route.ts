@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcrypt'
+// bcryptjs import removed - currently using simple PIN comparison for demo
 
 /**
  * POST /api/portal/auth/login

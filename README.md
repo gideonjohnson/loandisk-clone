@@ -31,7 +31,7 @@ A comprehensive cloud-based loan management platform built with Next.js, designe
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd loandisk-clone
+cd meek
 ```
 
 2. Install dependencies:
@@ -68,17 +68,17 @@ npm run dev
 After seeding the database, you can log in with:
 
 **Admin User:**
-- Email: `admin@loandisk.com`
+- Email: `admin@meek.com`
 - Password: `admin123`
 
 **Loan Officer:**
-- Email: `officer@loandisk.com`
+- Email: `officer@meek.com`
 - Password: `officer123`
 
 ## Project Structure
 
 ```
-loandisk-clone/
+meek/
 ├── app/
 │   ├── api/              # API routes
 │   │   ├── auth/         # NextAuth authentication

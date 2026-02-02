@@ -28,6 +28,7 @@ export default function InvestorsPage() {
 
   useEffect(() => {
     fetchInvestors()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, statusFilter])
 
   const fetchInvestors = async () => {

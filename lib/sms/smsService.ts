@@ -96,7 +96,7 @@ async function sendViaTwilio(
   }
 
   try {
-    // @ts-ignore - twilio is an optional dependency
+    // @ts-expect-error - twilio is an optional dependency
     const twilio = await import('twilio')
     const client = twilio.default(config.accountSid, config.authToken)
 
@@ -128,7 +128,7 @@ async function sendViaAfricasTalking(
   }
 
   try {
-    // @ts-ignore - africastalking is an optional dependency
+    // @ts-expect-error - africastalking is an optional dependency
     const AfricasTalking = (await import('africastalking')).default
     const at = AfricasTalking({
       apiKey: config.apiKey,

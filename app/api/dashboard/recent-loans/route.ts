@@ -7,7 +7,7 @@ import { createAuthHandler } from '@/lib/middleware/withAuth'
  * Get the 10 most recent loans
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const limit = parseInt(searchParams.get('limit') || '10', 10)

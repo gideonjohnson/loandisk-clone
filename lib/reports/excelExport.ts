@@ -10,7 +10,7 @@ import { format } from 'date-fns'
  * Export data to Excel
  */
 export function exportToExcel(
-  data: any[],
+  data: Record<string, unknown>[],
   filename: string,
   sheetName: string = 'Sheet1'
 ): Blob {

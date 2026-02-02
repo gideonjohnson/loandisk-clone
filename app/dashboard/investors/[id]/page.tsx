@@ -14,7 +14,6 @@ import {
   Loader2,
   Phone,
   Mail,
-  MapPin,
   Building,
 } from 'lucide-react'
 
@@ -67,7 +66,7 @@ interface Investor {
 
 export default function InvestorDetailPage() {
   const params = useParams()
-  const router = useRouter()
+  useRouter() // Used for navigation context
   const [investor, setInvestor] = useState<Investor | null>(null)
   const [loading, setLoading] = useState(true)
   const [showNewAccountModal, setShowNewAccountModal] = useState(false)
@@ -88,6 +87,7 @@ export default function InvestorDetailPage() {
 
   useEffect(() => {
     fetchInvestor()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   const fetchInvestor = async () => {

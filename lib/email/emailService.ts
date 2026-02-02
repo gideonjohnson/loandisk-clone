@@ -371,7 +371,6 @@ async function sendViaSMTP(
   }
 
   try {
-    // @ts-ignore - nodemailer is an optional dependency
     const nodemailer = await import('nodemailer')
     const transporter = nodemailer.createTransport({
       host: config.smtp.host,
@@ -413,7 +412,6 @@ async function sendViaSendGrid(
   }
 
   try {
-    // @ts-ignore - sendgrid is an optional dependency
     const sgMail = (await import('@sendgrid/mail')).default
     sgMail.setApiKey(config.sendgrid.apiKey)
 

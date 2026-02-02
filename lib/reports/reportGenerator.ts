@@ -110,7 +110,7 @@ export async function generateCashFlowReport(
   endDate: Date,
   branchId?: string
 ): Promise<CashFlowReport> {
-  const where: any = {
+  const where: Record<string, unknown> = {
     createdAt: {
       gte: startDate,
       lte: endDate,
@@ -241,7 +241,7 @@ export async function generateCashFlowReport(
 export async function generatePortfolioReport(
   branchId?: string
 ): Promise<PortfolioReport> {
-  const where: any = {}
+  const where: Record<string, unknown> = {}
 
   if (branchId) {
     where.branchId = branchId

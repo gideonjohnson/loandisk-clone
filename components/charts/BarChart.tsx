@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 interface BarChartProps {
   title: string
   description?: string
-  data: any[]
+  data: Record<string, unknown>[]
   xKey: string
   bars: Array<{
     key: string
@@ -14,7 +14,7 @@ interface BarChartProps {
     color: string
   }>
   height?: number
-  formatYAxis?: (value: any) => string
+  formatYAxis?: (value: number | string) => string
   stacked?: boolean
 }
 
@@ -56,7 +56,7 @@ export function BarChart({
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '6px',
               }}
-              formatter={(value: any) => formatYAxis ? formatYAxis(value) : value}
+              formatter={(value) => formatYAxis && value !== undefined ? formatYAxis(value as number | string) : value}
             />
             <Legend />
             {bars.map((bar) => (

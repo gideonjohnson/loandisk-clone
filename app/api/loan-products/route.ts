@@ -91,9 +91,9 @@ export const POST = createAuthHandler(
       })
 
       return NextResponse.json({ product }, { status: 201 })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Create loan product error:', error)
-      if (error.code === 'P2002') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
         return NextResponse.json(
           { error: 'A product with this name or code already exists' },
           { status: 400 }

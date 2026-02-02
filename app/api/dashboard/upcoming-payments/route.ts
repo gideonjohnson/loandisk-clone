@@ -8,7 +8,7 @@ import { addDays } from 'date-fns'
  * Get payments due in the next 7 days
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const days = parseInt(searchParams.get('days') || '7', 10)

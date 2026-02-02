@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 interface LineChartProps {
   title: string
   description?: string
-  data: any[]
+  data: Record<string, unknown>[]
   xKey: string
   lines: Array<{
     key: string
@@ -14,7 +14,7 @@ interface LineChartProps {
     color: string
   }>
   height?: number
-  formatYAxis?: (value: any) => string
+  formatYAxis?: (value: number | string) => string
 }
 
 export function LineChart({
@@ -54,7 +54,7 @@ export function LineChart({
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '6px',
               }}
-              formatter={(value: any) => formatYAxis ? formatYAxis(value) : value}
+              formatter={(value) => formatYAxis && value !== undefined ? formatYAxis(value as number | string) : value}
             />
             <Legend />
             {lines.map((line) => (

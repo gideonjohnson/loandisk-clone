@@ -20,7 +20,7 @@ export async function GET() {
     // Check database connection
     await prisma.$queryRaw`SELECT 1`
     health.checks.database = 'ok'
-  } catch (error) {
+  } catch {
     health.status = 'degraded'
     health.checks.database = 'error'
   }

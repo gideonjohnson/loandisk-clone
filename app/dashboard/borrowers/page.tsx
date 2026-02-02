@@ -83,7 +83,7 @@ export default function BorrowersPage() {
             {borrowers.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                  No borrowers found. Click "Add Borrower" to create one.
+                  No borrowers found. Click &quot;Add Borrower&quot; to create one.
                 </td>
               </tr>
             ) : (

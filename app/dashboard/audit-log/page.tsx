@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Activity, User, FileText, CreditCard, DollarSign, Settings, Search } from 'lucide-react'
+import { Activity, User, FileText, CreditCard, Settings, Search } from 'lucide-react'
 
 interface ActivityLog {
   id: string

@@ -496,7 +496,7 @@ export default function BorrowerDetailPage() {
 
         {!showStatement && (
           <p className="text-gray-500 text-center py-8">
-            Click "Generate Statement" to view the account statement
+            Click &quot;Generate Statement&quot; to view the account statement
           </p>
         )}
       </div>

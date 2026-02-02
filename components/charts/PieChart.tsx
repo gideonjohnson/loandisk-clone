@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 interface PieChartProps {
   title: string
   description?: string
-  data: any[]
+  data: Record<string, unknown>[]
   dataKey: string
   nameKey: string
   height?: number
   colors?: string[]
-  formatValue?: (value: any) => string
+  formatValue?: (value: number | string) => string
 }
 
 const DEFAULT_COLORS = [
@@ -64,7 +64,7 @@ export function PieChart({
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '6px',
               }}
-              formatter={(value: any) => formatValue ? formatValue(value) : value}
+              formatter={(value) => formatValue && value !== undefined ? formatValue(value as number | string) : value}
             />
             <Legend />
           </RechartsPieChart>

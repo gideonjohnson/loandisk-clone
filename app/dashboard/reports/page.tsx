@@ -103,14 +103,15 @@ export default function ReportsPage() {
     }).format(amount)
   }
 
-  const formatCurrencyShort = (value: number) => {
-    if (value >= 1000000) {
-      return `KSh ${(value / 1000000).toFixed(1)}M`
+  const formatCurrencyShort = (value: number | string) => {
+    const numValue = typeof value === 'string' ? parseFloat(value) : value
+    if (numValue >= 1000000) {
+      return `KSh ${(numValue / 1000000).toFixed(1)}M`
     }
-    if (value >= 1000) {
-      return `KSh ${(value / 1000).toFixed(0)}K`
+    if (numValue >= 1000) {
+      return `KSh ${(numValue / 1000).toFixed(0)}K`
     }
-    return `KSh ${value.toFixed(0)}`
+    return `KSh ${numValue.toFixed(0)}`
   }
 
   // Prepare chart data

@@ -117,7 +117,7 @@ export default function LoansPage() {
             {loans.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                  No loans found. Click "New Loan" to create one.
+                  No loans found. Click &quot;New Loan&quot; to create one.
                 </td>
               </tr>
             ) : (

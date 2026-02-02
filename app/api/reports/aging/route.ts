@@ -9,7 +9,7 @@ import { exportAgingToExcel } from '@/lib/reports/excelExport'
  * Generate aging report
  */
 export const GET = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const { searchParams } = new URL(request.url)
       const exportFormat = searchParams.get('export') // 'excel' or null

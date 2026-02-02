@@ -205,7 +205,7 @@ export default function SettingsPage() {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="africastalking">Africa's Talking</option>
+                      <option value="africastalking">Africa&apos;s Talking</option>
                       <option value="twilio">Twilio</option>
                       <option value="nexmo">Vonage (Nexmo)</option>
                     </select>

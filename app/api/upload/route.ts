@@ -8,7 +8,7 @@ import { Permission } from '@/lib/permissions'
  * Upload one or multiple files
  */
 export const POST = createAuthHandler(
-  async (request: Request, session) => {
+  async (request: Request, _session) => {
     try {
       const formData = await request.formData()
       const files = formData.getAll('files') as File[]

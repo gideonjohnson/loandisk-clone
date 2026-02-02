@@ -52,9 +52,9 @@ export const PATCH = createAuthHandler(
       })
 
       return NextResponse.json({ product })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update loan product error:', error)
-      if (error.code === 'P2025') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
         return NextResponse.json(
           { error: 'Loan product not found' },
           { status: 404 }
@@ -83,9 +83,9 @@ export const DELETE = createAuthHandler(
       })
 
       return NextResponse.json({ success: true })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Delete loan product error:', error)
-      if (error.code === 'P2025') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
         return NextResponse.json(
           { error: 'Loan product not found' },
           { status: 404 }

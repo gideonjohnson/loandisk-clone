@@ -211,7 +211,7 @@ export function LoanApprovalCard({ loan, onApprovalChange }: LoanApprovalCardPro
                     </p>
                     {approval.comments && (
                       <p className="text-xs text-muted-foreground italic mt-1">
-                        "{approval.comments}"
+                        &quot;{approval.comments}&quot;
                       </p>
                     )}
                   </div>

@@ -62,9 +62,9 @@ export const PATCH = createAuthHandler(
       })
 
       return NextResponse.json({ guarantor })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update guarantor error:', error)
-      if (error.code === 'P2025') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
         return NextResponse.json(
           { error: 'Guarantor not found' },
           { status: 404 }
@@ -93,9 +93,9 @@ export const DELETE = createAuthHandler(
       })
 
       return NextResponse.json({ success: true })
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Delete guarantor error:', error)
-      if (error.code === 'P2025') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
         return NextResponse.json(
           { error: 'Guarantor not found' },
           { status: 404 }

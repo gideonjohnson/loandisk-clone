@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Building2, Plus, Users, DollarSign, TrendingUp, MapPin } from 'lucide-react'
+import { Building2, Plus, Users, DollarSign, TrendingUp } from 'lucide-react'
 
 interface BranchStats {
   id: string

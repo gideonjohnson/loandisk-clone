@@ -71,8 +71,8 @@ export default function NewUserPage() {
       }
 
       router.push('/dashboard/users')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
