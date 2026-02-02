@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
-// bcryptjs import removed - currently using simple PIN comparison for demo
+import bcrypt from 'bcryptjs'
 
 /**
  * POST /api/portal/auth/login
@@ -35,12 +35,17 @@ export async function POST(request: Request) {
     }
 
     // Check if borrower has a PIN set
-    // For demo, we'll use a default PIN of "1234" or check portalPin field
-    const storedPin = (borrower as { portalPin?: string }).portalPin || '1234'
+    const storedPin = (borrower as { portalPin?: string }).portalPin
 
-    // In production, use bcrypt:
-    // const isValidPin = await bcrypt.compare(pin, borrower.portalPin)
-    const isValidPin = pin === storedPin
+    if (!storedPin) {
+      return NextResponse.json(
+        { error: 'Account not set up for portal access. Please register first.' },
+        { status: 401 }
+      )
+    }
+
+    // Verify PIN using bcrypt
+    const isValidPin = await bcrypt.compare(pin, storedPin)
 
     if (!isValidPin) {
       return NextResponse.json(

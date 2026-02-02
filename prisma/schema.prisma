@@ -41,7 +41,7 @@ model Borrower {
   firstName         String
   lastName          String
   email             String?
-  phone             String
+  phone             String   @unique
   address           String?
   city              String?
   country           String?
@@ -57,6 +57,7 @@ model Borrower {
   businessName      String?
   businessType      String?
   photoUrl          String?
+  portalPin         String?
   kycVerified       Boolean  @default(false)
   kycVerifiedAt     DateTime?
   blacklisted       Boolean  @default(false)

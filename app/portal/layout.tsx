@@ -4,7 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, CreditCard, Wallet, FileText, User, LogOut, Menu, X, HelpCircle
+  Home, CreditCard, Wallet, FileText, User, LogOut, Menu, X, HelpCircle,
+  Package, PlusCircle, ClipboardList
 } from 'lucide-react'
 
 export default function PortalLayout({
@@ -17,6 +18,9 @@ export default function PortalLayout({
 
   const navigation = [
     { name: 'Dashboard', href: '/portal', icon: Home },
+    { name: 'Loan Products', href: '/portal/products', icon: Package },
+    { name: 'Apply for Loan', href: '/portal/apply', icon: PlusCircle },
+    { name: 'My Applications', href: '/portal/applications', icon: ClipboardList },
     { name: 'My Loans', href: '/portal/loans', icon: CreditCard },
     { name: 'Payments', href: '/portal/payments', icon: Wallet },
     { name: 'Documents', href: '/portal/documents', icon: FileText },
