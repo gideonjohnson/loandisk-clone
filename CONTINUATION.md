@@ -18,7 +18,7 @@ A comprehensive microfinance loan management system with staff dashboard and bor
 - **GitHub Repo**: https://github.com/gideonjohnson/loandisk-clone
 - **Vercel Project**: gideons-projects-07acaa4a/loandisk-clone
 - **Latest Deploy**: https://loandisk-clone-8ot2msh5z-gideons-projects-07acaa4a.vercel.app
-- **Custom Domain**: (pending — user is setting one up)
+- **Custom Domain**: https://meekfund.ink (DNS config needed — see below)
 - Dev server: `http://localhost:3000`
 - 29 tests passing (vitest)
 - Build: 110 routes compiled, zero errors
@@ -321,7 +321,7 @@ git push origin master  # Push to GitHub
 ```
 DATABASE_URL          — Neon PostgreSQL connection string
 NEXTAUTH_SECRET       — Auth secret
-NEXTAUTH_URL          — Production URL
+NEXTAUTH_URL          — https://meekfund.ink
 CRON_SECRET           — API key for cron job authentication
 # Optional:
 EMAIL_PROVIDER, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
@@ -338,7 +338,8 @@ AT_API_KEY, AT_USERNAME, AT_SENDER_ID
 5. All 6 planned features are complete — see "Potential Next Steps" below
 
 ## Potential Next Steps
-- [ ] Custom domain setup on Vercel (user is working on this)
+- [ ] Custom domain DNS verification (meekfund.ink → A record 76.76.21.21, www → CNAME cname.vercel-dns.com)
+- [ ] Update NEXTAUTH_URL env var on Vercel to https://meekfund.ink
 - [ ] Serwist service worker for offline caching (PWA enhancement)
 - [ ] Third-party KYC/AML provider integration (e.g. Smile ID, Onfido)
 - [ ] Real-time notifications (WebSocket or SSE)
