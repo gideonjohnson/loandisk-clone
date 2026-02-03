@@ -89,6 +89,20 @@ export enum Permission {
   // Notification permissions
   NOTIFICATION_VIEW = 'notification:view',
   NOTIFICATION_SEND = 'notification:send',
+
+  // Security permissions
+  SECURITY_VIEW = 'security:view',
+  SECURITY_MANAGE = 'security:manage',
+  IP_RULES_MANAGE = 'security:ip-rules',
+
+  // KYC permissions
+  KYC_VIEW = 'kyc:view',
+  KYC_REVIEW = 'kyc:review',
+  KYC_MANAGE = 'kyc:manage',
+
+  // Fraud permissions
+  FRAUD_VIEW = 'fraud:view',
+  FRAUD_REVIEW = 'fraud:review',
 }
 
 // Role-based permission mappings
@@ -96,7 +110,7 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
   // Admin has all permissions
   ADMIN: Object.values(Permission),
 
-  // Manager has most permissions except system settings
+  // Manager has most permissions except system settings and IP rules
   MANAGER: [
     // Borrowers
     Permission.BORROWER_VIEW,
@@ -160,6 +174,19 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     // Notifications
     Permission.NOTIFICATION_VIEW,
     Permission.NOTIFICATION_SEND,
+
+    // Security
+    Permission.SECURITY_VIEW,
+    Permission.SECURITY_MANAGE,
+
+    // KYC
+    Permission.KYC_VIEW,
+    Permission.KYC_REVIEW,
+    Permission.KYC_MANAGE,
+
+    // Fraud
+    Permission.FRAUD_VIEW,
+    Permission.FRAUD_REVIEW,
   ],
 
   // Branch Manager - manages specific branch operations
@@ -214,6 +241,12 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     // Notifications
     Permission.NOTIFICATION_VIEW,
     Permission.NOTIFICATION_SEND,
+
+    // Security & KYC & Fraud
+    Permission.SECURITY_VIEW,
+    Permission.KYC_VIEW,
+    Permission.KYC_REVIEW,
+    Permission.FRAUD_VIEW,
   ],
 
   // Loan Officer - creates and manages loans
@@ -252,6 +285,9 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
 
     // Notifications
     Permission.NOTIFICATION_VIEW,
+
+    // KYC
+    Permission.KYC_VIEW,
   ],
 
   // Cashier - handles payments
@@ -354,6 +390,13 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
     // Notifications
     Permission.NOTIFICATION_VIEW,
     Permission.NOTIFICATION_SEND,
+
+    // Security & KYC & Fraud
+    Permission.SECURITY_VIEW,
+    Permission.KYC_VIEW,
+    Permission.KYC_REVIEW,
+    Permission.FRAUD_VIEW,
+    Permission.FRAUD_REVIEW,
   ],
 
   // Collector - focuses on collections and overdue payments

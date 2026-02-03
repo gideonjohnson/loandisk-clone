@@ -22,6 +22,8 @@ interface NotificationSettings {
   atApiKey: string
   atUsername: string
   atFrom: string
+  // Test
+  testPhoneNumber: string
 }
 
 export default function NotificationSettingsPage() {
@@ -42,6 +44,7 @@ export default function NotificationSettingsPage() {
     atApiKey: '',
     atUsername: '',
     atFrom: '',
+    testPhoneNumber: '',
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -376,14 +379,29 @@ export default function NotificationSettingsPage() {
             </div>
           )}
 
-          <button
-            onClick={testSMS}
-            disabled={testingSMS}
-            className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50"
-          >
-            {testingSMS ? <Loader2 className="w-4 h-4 animate-spin" /> : <TestTube className="w-4 h-4" />}
-            Send Test SMS
-          </button>
+          <div className="border-t pt-4 mt-4">
+            <h3 className="font-medium mb-3">Test SMS</h3>
+            <div className="flex items-end gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-1">Test Phone Number</label>
+                <input
+                  type="tel"
+                  value={settings.testPhoneNumber}
+                  onChange={(e) => setSettings({ ...settings, testPhoneNumber: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="+1234567890"
+                />
+              </div>
+              <button
+                onClick={testSMS}
+                disabled={testingSMS || !settings.testPhoneNumber}
+                className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                {testingSMS ? <Loader2 className="w-4 h-4 animate-spin" /> : <TestTube className="w-4 h-4" />}
+                Send Test SMS
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

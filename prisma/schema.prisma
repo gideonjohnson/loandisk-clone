@@ -34,6 +34,11 @@ model User {
   notifications     Notification[]
   activityLogs      ActivityLog[]
   reportTemplates   ReportTemplate[]
+  loginHistory      LoginHistory[]
+  devices           UserDevice[]
+  sessions          UserSession[]
+  securityAlerts    SecurityAlert[]
+  kycReviews        KYCVerification[]
 }
 
 model Borrower {
@@ -72,6 +77,7 @@ model Borrower {
   fraudChecks       FraudCheck[]
   preference        BorrowerPreference?
   signatureRequests SignatureRequest[]
+  kycVerifications  KYCVerification[]
 }
 
 model Loan {
@@ -111,6 +117,7 @@ model Loan {
   penalties         Penalty[]
   fraudChecks       FraudCheck[]
   signatureRequests SignatureRequest[]
+  riskScores        LoanRiskScore[]
 }
 
 model LoanSchedule {
@@ -518,4 +525,157 @@ model InvestorTransaction {
 
   investor          Investor @relation(fields: [investorId], references: [id])
   account           InvestorAccount @relation(fields: [accountId], references: [id])
+}
+
+// ============================================================
+// Security Models
+// ============================================================
+
+model LoginHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  ipAddress       String?
+  userAgent       String?
+  deviceType      String?
+  browser         String?
+  os              String?
+  location        String?
+  status          String   // SUCCESS, FAILED, BLOCKED
+  failureReason   String?
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model UserDevice {
+  id                String   @id @default(cuid())
+  userId            String
+  deviceFingerprint String
+  deviceName        String?
+  deviceType        String?
+  browser           String?
+  os                String?
+  lastIpAddress     String?
+  isTrusted         Boolean  @default(false)
+  firstSeenAt       DateTime @default(now())
+  lastSeenAt        DateTime @default(now())
+
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, deviceFingerprint])
+}
+
+model UserSession {
+  id              String    @id @default(cuid())
+  userId          String
+  sessionToken    String    @unique
+  deviceId        String?
+  ipAddress       String?
+  userAgent       String?
+  isActive        Boolean   @default(true)
+  lastActivity    DateTime  @default(now())
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  revokedReason   String?
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+model IPRule {
+  id              String    @id @default(cuid())
+  ipAddress       String
+  type            String    // WHITELIST, BLACKLIST
+  reason          String?
+  createdBy       String
+  expiresAt       DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  @@unique([ipAddress, type])
+}
+
+model SecurityAlert {
+  id              String    @id @default(cuid())
+  userId          String
+  type            String    // NEW_DEVICE, PASSWORD_CHANGE, FAILED_LOGIN_SPIKE, UNUSUAL_LOCATION, SESSION_REVOKED
+  title           String
+  message         String
+  severity        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  acknowledged    Boolean   @default(false)
+  acknowledgedAt  DateTime?
+  metadata        String?
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+// ============================================================
+// KYC/AML Models
+// ============================================================
+
+model KYCVerification {
+  id              String    @id @default(cuid())
+  borrowerId      String
+  status          String    @default("NOT_STARTED") // NOT_STARTED, PENDING, UNDER_REVIEW, VERIFIED, REJECTED
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  reviewNotes     String?
+  rejectionReason String?
+
+  idFrontUrl      String?
+  idBackUrl       String?
+  selfieUrl       String?
+  proofOfAddress  String?
+  documentType    String?   // NATIONAL_ID, PASSPORT, DRIVERS_LICENSE
+  documentNumber  String?
+
+  amlCheckStatus  String?   @default("PENDING") // PENDING, CLEAR, FLAGGED
+  amlCheckDate    DateTime?
+  amlFlags        String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  borrower        Borrower  @relation(fields: [borrowerId], references: [id])
+  reviewer        User?     @relation(fields: [reviewedBy], references: [id])
+}
+
+// ============================================================
+// Analytics Models
+// ============================================================
+
+model PortfolioSnapshot {
+  id                  String   @id @default(cuid())
+  snapshotDate        DateTime
+  totalLoans          Int
+  activeLoans         Int
+  totalDisbursed      Decimal
+  totalOutstanding    Decimal
+  totalCollected      Decimal
+  totalOverdue        Decimal
+  portfolioAtRisk     Decimal
+  averageLoanSize     Decimal
+  defaultRate         Decimal
+  collectionRate      Decimal
+  newLoansCount       Int
+  newLoansAmount      Decimal
+  writeOffs           Decimal  @default(0)
+  branchId            String?
+  createdAt           DateTime @default(now())
+
+  @@unique([snapshotDate, branchId])
+}
+
+model LoanRiskScore {
+  id                  String   @id @default(cuid())
+  loanId              String
+  riskScore           Int
+  riskLevel           String   // LOW, MEDIUM, HIGH, CRITICAL
+  factors             String
+  predictedDefault    Boolean
+  calculatedAt        DateTime @default(now())
+
+  loan                Loan     @relation(fields: [loanId], references: [id])
 }

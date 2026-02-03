@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { checkLoanEligibility } from '@/lib/credit/creditScoringService'
 import { createNotification } from '@/lib/notifications/notificationService'
+import { runFraudCheck } from '@/lib/fraud/fraudDetectionService'
 
 /**
  * POST /api/portal/loans/apply
@@ -166,6 +167,17 @@ export async function POST(request: Request) {
       title: 'New Loan Application',
       message: `New loan application #${loanNumber} from ${borrower.firstName} ${borrower.lastName} for KSh ${amount.toLocaleString()}`,
     })
+
+    // Run fraud detection check
+    try {
+      await runFraudCheck({
+        borrowerId,
+        loanId: loan.id,
+        amount,
+      })
+    } catch (e) {
+      console.error('Fraud check failed (non-blocking):', e)
+    }
 
     // Log activity
     await prisma.activityLog.create({

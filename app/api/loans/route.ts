@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { calculateLoan, generateLoanNumber } from '@/lib/utils/loanCalculator'
+import { runFraudCheck } from '@/lib/fraud/fraudDetectionService'
 
 export async function GET() {
   try {
@@ -91,6 +92,27 @@ export async function POST(request: Request) {
     await prisma.loanSchedule.createMany({
       data: scheduleData
     })
+
+    // Run fraud detection check in the background
+    try {
+      const fraudResult = await runFraudCheck({
+        borrowerId: body.borrowerId,
+        loanId: loan.id,
+        amount: parseFloat(body.principalAmount),
+      })
+      if (fraudResult.isSuspicious) {
+        return NextResponse.json({
+          ...loan,
+          fraudAlert: {
+            riskScore: fraudResult.riskScore,
+            flags: fraudResult.flags,
+            message: 'Fraud check flagged this loan application for review',
+          },
+        })
+      }
+    } catch (e) {
+      console.error('Fraud check failed (non-blocking):', e)
+    }
 
     return NextResponse.json(loan)
   } catch (error) {

@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, DollarSign, CreditCard, BarChart3, Settings,
-  LogOut, Wallet, Bell, Menu, X, Building2, Briefcase, FileText
+  LogOut, Wallet, Bell, Menu, X, Building2, Briefcase, FileText,
+  ShieldCheck, AlertTriangle, UserCheck
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -33,6 +34,8 @@ export default function DashboardLayout({
     { name: 'Payments', href: '/dashboard/payments', icon: CreditCard },
     { name: 'Reminders', href: '/dashboard/reminders', icon: Bell },
     { name: 'Branches', href: '/dashboard/branches', icon: Building2 },
+    { name: 'KYC', href: '/dashboard/kyc', icon: UserCheck },
+    { name: 'Fraud', href: '/dashboard/fraud', icon: AlertTriangle },
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
     { name: 'Templates', href: '/dashboard/templates', icon: FileText },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },

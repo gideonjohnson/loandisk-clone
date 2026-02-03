@@ -25,6 +25,13 @@ export const metadata: Metadata = {
   title: "Meek - Microfinance Loan Management Software",
   description: "Cloud-based loan management system for microfinance institutions, SACCOs, and money lenders. Automate loan origination, tracking, and collections.",
   keywords: "loan management software, microfinance software, SACCO software, money lending software, loan tracking, loan origination",
+  manifest: "/manifest.json",
+  themeColor: "#2563eb",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Meek",
+  },
   openGraph: {
     title: "Meek - Modern Loan Management Software",
     description: "Automate your lending operations with cloud-based loan management for microfinance institutions.",
@@ -39,6 +46,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body
         className={`${rajdhani.variable} ${inter.variable} ${geistMono.variable} antialiased font-sans`}
       >

@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { getEmailConfigFromDB } from '@/lib/config/notificationConfig'
 
 export type EmailProvider = 'smtp' | 'sendgrid' | 'mock'
 
@@ -337,26 +338,10 @@ export const EMAIL_TEMPLATES = {
 }
 
 /**
- * Get email configuration from environment
+ * Get email configuration from database (with env var fallback)
  */
-function getEmailConfig(): EmailConfig {
-  const provider = (process.env.EMAIL_PROVIDER || 'mock') as EmailProvider
-
-  return {
-    provider,
-    from: process.env.EMAIL_FROM || 'noreply@example.com',
-    fromName: process.env.EMAIL_FROM_NAME || 'Loan Management System',
-    smtp: {
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: process.env.SMTP_SECURE === 'true',
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
-    },
-    sendgrid: {
-      apiKey: process.env.SENDGRID_API_KEY || '',
-    },
-  }
+async function getEmailConfig(): Promise<EmailConfig> {
+  return getEmailConfigFromDB()
 }
 
 /**
@@ -459,7 +444,7 @@ async function sendViaMock(params: SendEmailParams): Promise<EmailResult> {
  * Send email using configured provider
  */
 export async function sendEmail(params: SendEmailParams): Promise<EmailResult> {
-  const config = getEmailConfig()
+  const config = await getEmailConfig()
   let result: EmailResult
 
   switch (config.provider) {
@@ -477,6 +462,28 @@ export async function sendEmail(params: SendEmailParams): Promise<EmailResult> {
   // Log email to database
   await logEmail(params, result)
 
+  return result
+}
+
+/**
+ * Send email using an explicit config (used by test endpoints)
+ */
+export async function sendEmailWithConfig(params: SendEmailParams, config: EmailConfig): Promise<EmailResult> {
+  let result: EmailResult
+
+  switch (config.provider) {
+    case 'smtp':
+      result = await sendViaSMTP(params, config)
+      break
+    case 'sendgrid':
+      result = await sendViaSendGrid(params, config)
+      break
+    case 'mock':
+    default:
+      result = await sendViaMock(params)
+  }
+
+  await logEmail(params, result)
   return result
 }
 

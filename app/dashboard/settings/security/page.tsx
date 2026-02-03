@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Shield,
@@ -13,12 +13,105 @@ import {
   ArrowLeft,
   RefreshCw,
   Download,
+  Monitor,
+  Globe,
+  Clock,
+  Bell,
+  Trash2,
+  LogOut,
+  CheckCircle,
+  XCircle,
+  ShieldAlert,
+  Laptop,
+  Tablet,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+
+// ---------- Type definitions for new sections ----------
+
+interface LoginHistoryEntry {
+  id: string
+  ipAddress: string
+  userAgent: string
+  deviceType: string
+  browser: string
+  os: string
+  location: string
+  status: string
+  createdAt: string
+}
+
+interface DeviceEntry {
+  id: string
+  deviceName: string
+  deviceType: string
+  browser: string
+  os: string
+  lastIpAddress: string
+  isTrusted: boolean
+  lastUsedAt: string
+}
+
+interface SessionEntry {
+  id: string
+  ipAddress: string
+  userAgent: string
+  isActive: boolean
+  lastActivity: string
+  createdAt: string
+  device?: { deviceName: string }
+}
+
+interface AlertEntry {
+  id: string
+  type: string
+  title: string
+  message: string
+  severity: string
+  acknowledged: boolean
+  createdAt: string
+}
+
+type SecurityTab = 'login-history' | 'devices' | 'sessions' | 'alerts'
+
+// ---------- Helper functions ----------
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function formatRelativeTime(dateStr: string): string {
+  const now = new Date()
+  const date = new Date(dateStr)
+  const diffMs = now.getTime() - date.getTime()
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 1) return 'Just now'
+  if (diffMin < 60) return `${diffMin}m ago`
+  const diffHr = Math.floor(diffMin / 60)
+  if (diffHr < 24) return `${diffHr}h ago`
+  const diffDay = Math.floor(diffHr / 24)
+  if (diffDay < 30) return `${diffDay}d ago`
+  return formatDate(dateStr)
+}
+
+function getDeviceIcon(deviceType: string) {
+  const dt = deviceType?.toLowerCase() || ''
+  if (dt.includes('mobile') || dt.includes('phone')) return Smartphone
+  if (dt.includes('tablet')) return Tablet
+  if (dt.includes('laptop')) return Laptop
+  return Monitor
+}
 
 export default function SecuritySettingsPage() {
   const router = useRouter()
@@ -37,9 +130,239 @@ export default function SecuritySettingsPage() {
   const [regeneratingCodes, setRegeneratingCodes] = useState(false)
   const [copied, setCopied] = useState(false)
 
+  // ---------- New state for tabbed sections ----------
+  const [activeSecurityTab, setActiveSecurityTab] = useState<SecurityTab>('login-history')
+  const [tabLoading, setTabLoading] = useState(false)
+
+  const [loginHistory, setLoginHistory] = useState<LoginHistoryEntry[]>([])
+  const [loginHistoryLoaded, setLoginHistoryLoaded] = useState(false)
+
+  const [devices, setDevices] = useState<DeviceEntry[]>([])
+  const [devicesLoaded, setDevicesLoaded] = useState(false)
+
+  const [sessions, setSessions] = useState<SessionEntry[]>([])
+  const [sessionsLoaded, setSessionsLoaded] = useState(false)
+
+  const [alerts, setAlerts] = useState<AlertEntry[]>([])
+  const [alertsLoaded, setAlertsLoaded] = useState(false)
+
   useEffect(() => {
     check2FAStatus()
   }, [])
+
+  // ---------- Fetch data when tab changes ----------
+
+  const fetchLoginHistory = useCallback(async () => {
+    if (loginHistoryLoaded) return
+    setTabLoading(true)
+    try {
+      const res = await fetch('/api/security/login-history')
+      if (res.ok) {
+        const data = await res.json()
+        setLoginHistory(Array.isArray(data) ? data.slice(0, 20) : [])
+        setLoginHistoryLoaded(true)
+      }
+    } catch (error) {
+      console.error('Failed to fetch login history:', error)
+    } finally {
+      setTabLoading(false)
+    }
+  }, [loginHistoryLoaded])
+
+  const fetchDevices = useCallback(async () => {
+    if (devicesLoaded) return
+    setTabLoading(true)
+    try {
+      const res = await fetch('/api/security/devices')
+      if (res.ok) {
+        const data = await res.json()
+        setDevices(Array.isArray(data) ? data : [])
+        setDevicesLoaded(true)
+      }
+    } catch (error) {
+      console.error('Failed to fetch devices:', error)
+    } finally {
+      setTabLoading(false)
+    }
+  }, [devicesLoaded])
+
+  const fetchSessions = useCallback(async () => {
+    if (sessionsLoaded) return
+    setTabLoading(true)
+    try {
+      const res = await fetch('/api/security/sessions')
+      if (res.ok) {
+        const data = await res.json()
+        setSessions(Array.isArray(data) ? data : [])
+        setSessionsLoaded(true)
+      }
+    } catch (error) {
+      console.error('Failed to fetch sessions:', error)
+    } finally {
+      setTabLoading(false)
+    }
+  }, [sessionsLoaded])
+
+  const fetchAlerts = useCallback(async () => {
+    if (alertsLoaded) return
+    setTabLoading(true)
+    try {
+      const res = await fetch('/api/security/alerts')
+      if (res.ok) {
+        const data = await res.json()
+        setAlerts(Array.isArray(data) ? data : [])
+        setAlertsLoaded(true)
+      }
+    } catch (error) {
+      console.error('Failed to fetch alerts:', error)
+    } finally {
+      setTabLoading(false)
+    }
+  }, [alertsLoaded])
+
+  useEffect(() => {
+    switch (activeSecurityTab) {
+      case 'login-history':
+        fetchLoginHistory()
+        break
+      case 'devices':
+        fetchDevices()
+        break
+      case 'sessions':
+        fetchSessions()
+        break
+      case 'alerts':
+        fetchAlerts()
+        break
+    }
+  }, [activeSecurityTab, fetchLoginHistory, fetchDevices, fetchSessions, fetchAlerts])
+
+  // ---------- Action handlers for new sections ----------
+
+  const handleTrustDevice = async (deviceId: string) => {
+    try {
+      const res = await fetch(`/api/security/devices/${deviceId}/trust`, { method: 'POST' })
+      if (res.ok) {
+        setDevices((prev) =>
+          prev.map((d) => (d.id === deviceId ? { ...d, isTrusted: true } : d))
+        )
+        toast({ title: 'Device trusted', description: 'This device has been marked as trusted.' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to trust device', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to trust device', variant: 'destructive' })
+    }
+  }
+
+  const handleUntrustDevice = async (deviceId: string) => {
+    try {
+      const res = await fetch(`/api/security/devices/${deviceId}/trust`, { method: 'POST' })
+      if (res.ok) {
+        setDevices((prev) =>
+          prev.map((d) => (d.id === deviceId ? { ...d, isTrusted: false } : d))
+        )
+        toast({ title: 'Device untrusted', description: 'Trust has been removed from this device.' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to update device', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to update device', variant: 'destructive' })
+    }
+  }
+
+  const handleRemoveDevice = async (deviceId: string) => {
+    if (!confirm('Are you sure you want to remove this device?')) return
+    try {
+      const res = await fetch(`/api/security/devices?deviceId=${deviceId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setDevices((prev) => prev.filter((d) => d.id !== deviceId))
+        toast({ title: 'Device removed', description: 'The device has been removed.' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to remove device', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to remove device', variant: 'destructive' })
+    }
+  }
+
+  const handleRevokeSession = async (sessionId: string) => {
+    try {
+      const res = await fetch(`/api/security/sessions?sessionId=${sessionId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setSessions((prev) => prev.filter((s) => s.id !== sessionId))
+        toast({ title: 'Session revoked', description: 'The session has been terminated.' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to revoke session', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to revoke session', variant: 'destructive' })
+    }
+  }
+
+  const handleRevokeAllSessions = async () => {
+    if (!confirm('This will sign you out of all other sessions. Continue?')) return
+    try {
+      const res = await fetch('/api/security/sessions?all=true', { method: 'DELETE' })
+      if (res.ok) {
+        setSessions((prev) => prev.filter((s) => s.isActive).slice(0, 1))
+        setSessionsLoaded(false)
+        fetchSessions()
+        toast({ title: 'All sessions revoked', description: 'All other sessions have been terminated.' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to revoke sessions', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to revoke sessions', variant: 'destructive' })
+    }
+  }
+
+  const handleAcknowledgeAlert = async (alertId: string) => {
+    try {
+      const res = await fetch('/api/security/alerts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alertId }),
+      })
+      if (res.ok) {
+        setAlerts((prev) =>
+          prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a))
+        )
+        toast({ title: 'Alert acknowledged' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to acknowledge alert', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to acknowledge alert', variant: 'destructive' })
+    }
+  }
+
+  const handleAcknowledgeAllAlerts = async () => {
+    try {
+      const res = await fetch('/api/security/alerts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ all: true }),
+      })
+      if (res.ok) {
+        setAlerts((prev) => prev.map((a) => ({ ...a, acknowledged: true })))
+        toast({ title: 'All alerts acknowledged' })
+      } else {
+        const data = await res.json()
+        toast({ title: 'Error', description: data.error || 'Failed to acknowledge alerts', variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to acknowledge alerts', variant: 'destructive' })
+    }
+  }
+
+  // ---------- Existing 2FA handlers ----------
 
   const check2FAStatus = async () => {
     try {
@@ -246,6 +569,38 @@ export default function SecuritySettingsPage() {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  // ---------- Severity badge helper ----------
+
+  const severityBadge = (severity: string) => {
+    switch (severity?.toUpperCase()) {
+      case 'LOW':
+        return <Badge variant="secondary">{severity}</Badge>
+      case 'MEDIUM':
+        return <Badge variant="warning">{severity}</Badge>
+      case 'HIGH':
+        return <Badge variant="destructive">{severity}</Badge>
+      case 'CRITICAL':
+        return (
+          <Badge variant="destructive" className="bg-red-700 hover:bg-red-800">
+            {severity}
+          </Badge>
+        )
+      default:
+        return <Badge variant="outline">{severity}</Badge>
+    }
+  }
+
+  // ---------- Tab configuration ----------
+
+  const securityTabs: { key: SecurityTab; label: string; icon: React.ElementType }[] = [
+    { key: 'login-history', label: 'Login History', icon: Clock },
+    { key: 'devices', label: 'Devices', icon: Monitor },
+    { key: 'sessions', label: 'Sessions', icon: Globe },
+    { key: 'alerts', label: 'Alerts', icon: Bell },
+  ]
+
+  const unacknowledgedCount = alerts.filter((a) => !a.acknowledged).length
 
   if (loading) {
     return (
@@ -535,6 +890,378 @@ export default function SecuritySettingsPage() {
           </ul>
         </CardContent>
       </Card>
+
+      {/* ============================================================ */}
+      {/* Security Monitoring Tabs                                      */}
+      {/* ============================================================ */}
+
+      <div className="space-y-4">
+        {/* Tab Bar */}
+        <div className="flex border-b">
+          {securityTabs.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeSecurityTab === tab.key
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveSecurityTab(tab.key)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                  isActive
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+                {tab.key === 'alerts' && unacknowledgedCount > 0 && (
+                  <span className="ml-1 flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-xs font-semibold">
+                    {unacknowledgedCount}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Tab Content */}
+        {tabLoading ? (
+          <div className="flex items-center justify-center h-40">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
+            {/* ---- Login History Tab ---- */}
+            {activeSecurityTab === 'login-history' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Clock className="h-5 w-5" />
+                    Login History
+                  </CardTitle>
+                  <CardDescription>
+                    Your most recent sign-in activity
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loginHistory.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No login history available.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {loginHistory.map((entry) => {
+                        const DeviceIcon = getDeviceIcon(entry.deviceType)
+                        return (
+                          <div
+                            key={entry.id}
+                            className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="p-2 rounded-lg bg-gray-100 mt-0.5">
+                              <DeviceIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-medium">
+                                  {entry.browser || 'Unknown Browser'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  on {entry.os || 'Unknown OS'}
+                                </span>
+                                {entry.status?.toUpperCase() === 'SUCCESS' ? (
+                                  <Badge variant="success" className="text-xs">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Success
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="destructive" className="text-xs">
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Failed
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Globe className="h-3 w-3" />
+                                  {entry.ipAddress}
+                                </span>
+                                {entry.location && (
+                                  <span>{entry.location}</span>
+                                )}
+                                <span className="capitalize">{entry.deviceType}</span>
+                              </div>
+                            </div>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {formatRelativeTime(entry.createdAt)}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ---- Devices Tab ---- */}
+            {activeSecurityTab === 'devices' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Monitor className="h-5 w-5" />
+                    Recognized Devices
+                  </CardTitle>
+                  <CardDescription>
+                    Devices that have been used to access your account
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {devices.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No devices found.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {devices.map((device) => {
+                        const DeviceIcon = getDeviceIcon(device.deviceType)
+                        return (
+                          <div
+                            key={device.id}
+                            className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+                          >
+                            <div className={`p-2 rounded-lg ${device.isTrusted ? 'bg-green-100' : 'bg-gray-100'}`}>
+                              <DeviceIcon className={`h-4 w-4 ${device.isTrusted ? 'text-green-600' : 'text-muted-foreground'}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium truncate">
+                                  {device.deviceName || `${device.browser} on ${device.os}`}
+                                </span>
+                                {device.isTrusted && (
+                                  <Badge variant="success" className="text-xs">Trusted</Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                <span>{device.browser} / {device.os}</span>
+                                <span className="flex items-center gap-1">
+                                  <Globe className="h-3 w-3" />
+                                  {device.lastIpAddress}
+                                </span>
+                                <span>Last used {formatRelativeTime(device.lastUsedAt)}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {device.isTrusted ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleUntrustDevice(device.id)}
+                                >
+                                  <ShieldAlert className="h-3.5 w-3.5 mr-1" />
+                                  Untrust
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleTrustDevice(device.id)}
+                                >
+                                  <Shield className="h-3.5 w-3.5 mr-1" />
+                                  Trust
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                onClick={() => handleRemoveDevice(device.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ---- Sessions Tab ---- */}
+            {activeSecurityTab === 'sessions' && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Globe className="h-5 w-5" />
+                        Active Sessions
+                      </CardTitle>
+                      <CardDescription>
+                        Sessions currently signed into your account
+                      </CardDescription>
+                    </div>
+                    {sessions.length > 1 && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={handleRevokeAllSessions}
+                      >
+                        <LogOut className="h-3.5 w-3.5 mr-1" />
+                        Revoke All Others
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {sessions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No active sessions found.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {sessions.map((session) => (
+                        <div
+                          key={session.id}
+                          className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+                        >
+                          <div className={`p-2 rounded-lg ${session.isActive ? 'bg-green-100' : 'bg-gray-100'}`}>
+                            <Globe className={`h-4 w-4 ${session.isActive ? 'text-green-600' : 'text-muted-foreground'}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium truncate">
+                                {session.device?.deviceName || session.userAgent?.split(' ')[0] || 'Unknown Device'}
+                              </span>
+                              {session.isActive && (
+                                <Badge variant="success" className="text-xs">Active</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Globe className="h-3 w-3" />
+                                {session.ipAddress}
+                              </span>
+                              <span>
+                                Last activity {formatRelativeTime(session.lastActivity)}
+                              </span>
+                              <span>
+                                Started {formatDate(session.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRevokeSession(session.id)}
+                          >
+                            <LogOut className="h-3.5 w-3.5 mr-1" />
+                            Revoke
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ---- Alerts Tab ---- */}
+            {activeSecurityTab === 'alerts' && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Bell className="h-5 w-5" />
+                        Security Alerts
+                      </CardTitle>
+                      <CardDescription>
+                        Notifications about security events on your account
+                      </CardDescription>
+                    </div>
+                    {unacknowledgedCount > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAcknowledgeAllAlerts}
+                      >
+                        <Check className="h-3.5 w-3.5 mr-1" />
+                        Acknowledge All
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {alerts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      No security alerts.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {alerts.map((alert) => (
+                        <div
+                          key={alert.id}
+                          className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
+                            alert.acknowledged
+                              ? 'bg-card opacity-60'
+                              : 'bg-card border-amber-200'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg mt-0.5 ${
+                            alert.severity?.toUpperCase() === 'CRITICAL' || alert.severity?.toUpperCase() === 'HIGH'
+                              ? 'bg-red-100'
+                              : alert.severity?.toUpperCase() === 'MEDIUM'
+                                ? 'bg-amber-100'
+                                : 'bg-gray-100'
+                          }`}>
+                            <ShieldAlert className={`h-4 w-4 ${
+                              alert.severity?.toUpperCase() === 'CRITICAL' || alert.severity?.toUpperCase() === 'HIGH'
+                                ? 'text-red-600'
+                                : alert.severity?.toUpperCase() === 'MEDIUM'
+                                  ? 'text-amber-600'
+                                  : 'text-muted-foreground'
+                            }`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium">
+                                {alert.title}
+                              </span>
+                              {severityBadge(alert.severity)}
+                              {alert.acknowledged && (
+                                <Badge variant="secondary" className="text-xs">Acknowledged</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {alert.message}
+                            </p>
+                            <span className="text-xs text-muted-foreground mt-1 inline-block">
+                              {formatRelativeTime(alert.createdAt)}
+                            </span>
+                          </div>
+                          {!alert.acknowledged && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-shrink-0"
+                              onClick={() => handleAcknowledgeAlert(alert.id)}
+                            >
+                              <Check className="h-3.5 w-3.5 mr-1" />
+                              Acknowledge
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }

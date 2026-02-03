@@ -22,6 +22,7 @@ import {
   Clock,
   Eye,
   AlertCircle,
+  AlertTriangle,
   Loader2,
   LucideIcon,
 } from 'lucide-react'
@@ -107,6 +108,14 @@ interface SignatureRequest {
   borrowerEmail: string | null
 }
 
+interface FraudCheckSummary {
+  id: string
+  riskScore: number
+  isSuspicious: boolean
+  flags: string[]
+  checkedAt: string
+}
+
 interface LoanDetailPageProps {
   params: {
     id: string
@@ -116,6 +125,7 @@ interface LoanDetailPageProps {
 export default function LoanDetailPage({ params }: LoanDetailPageProps) {
   const [loan, setLoan] = useState<LoanData | null>(null)
   const [signatures, setSignatures] = useState<SignatureRequest[]>([])
+  const [fraudCheck, setFraudCheck] = useState<FraudCheckSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [requestingSignature, setRequestingSignature] = useState(false)
   const router = useRouter()
@@ -152,9 +162,32 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
     }
   }
 
+  const fetchFraudCheck = async () => {
+    try {
+      const response = await fetch(`/api/fraud?loanId=${params.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        const checks = Array.isArray(data) ? data : []
+        if (checks.length > 0) {
+          const check = checks[0]
+          setFraudCheck({
+            id: check.id,
+            riskScore: check.riskScore,
+            isSuspicious: check.isSuspicious,
+            flags: typeof check.flags === 'string' ? JSON.parse(check.flags) : check.flags || [],
+            checkedAt: check.checkedAt,
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch fraud check:', error)
+    }
+  }
+
   useEffect(() => {
     fetchLoan()
     fetchSignatures()
+    fetchFraudCheck()
   }, [params.id])
 
   const requestSignature = async () => {
@@ -293,6 +326,41 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
           </Button>
         </div>
       </div>
+
+      {/* Fraud Alert */}
+      {fraudCheck && fraudCheck.isSuspicious && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-red-800">Fraud Alert</h3>
+                  <Badge variant="destructive">Risk Score: {fraudCheck.riskScore}</Badge>
+                </div>
+                <p className="text-sm text-red-700 mb-2">
+                  This loan has been flagged by the fraud detection system.
+                </p>
+                {fraudCheck.flags.length > 0 && (
+                  <div className="flex gap-1 flex-wrap">
+                    {fraudCheck.flags.map((f) => (
+                      <Badge key={f} variant="outline" className="text-red-700 border-red-300 text-xs">{f}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/dashboard/fraud/${fraudCheck.id}`)}
+                className="flex-shrink-0"
+              >
+                Review
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Loan Summary */}

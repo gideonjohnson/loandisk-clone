@@ -5,6 +5,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { getSMSConfigFromDB } from '@/lib/config/notificationConfig'
 
 export type SMSProvider = 'twilio' | 'africastalking' | 'mock'
 
@@ -64,24 +65,10 @@ export const SMS_TEMPLATES = {
 }
 
 /**
- * Get SMS configuration from environment
+ * Get SMS configuration from database (with env var fallback)
  */
-function getSMSConfig(): SMSConfig {
-  const provider = (process.env.SMS_PROVIDER || 'mock') as SMSProvider
-
-  return {
-    provider,
-    twilio: {
-      accountSid: process.env.TWILIO_ACCOUNT_SID || '',
-      authToken: process.env.TWILIO_AUTH_TOKEN || '',
-      fromNumber: process.env.TWILIO_FROM_NUMBER || '',
-    },
-    africastalking: {
-      apiKey: process.env.AT_API_KEY || '',
-      username: process.env.AT_USERNAME || '',
-      from: process.env.AT_FROM || '',
-    },
-  }
+async function getSMSConfig(): Promise<SMSConfig> {
+  return getSMSConfigFromDB()
 }
 
 /**
@@ -174,7 +161,7 @@ async function sendViaMock(params: SendSMSParams): Promise<SMSResult> {
  * Send SMS using configured provider
  */
 export async function sendSMS(params: SendSMSParams): Promise<SMSResult> {
-  const config = getSMSConfig()
+  const config = await getSMSConfig()
   let result: SMSResult
 
   switch (config.provider) {
@@ -192,6 +179,28 @@ export async function sendSMS(params: SendSMSParams): Promise<SMSResult> {
   // Log SMS to database
   await logSMS(params, result)
 
+  return result
+}
+
+/**
+ * Send SMS using an explicit config (used by test endpoints)
+ */
+export async function sendSMSWithConfig(params: SendSMSParams, config: SMSConfig): Promise<SMSResult> {
+  let result: SMSResult
+
+  switch (config.provider) {
+    case 'twilio':
+      result = await sendViaTwilio(params, config.twilio)
+      break
+    case 'africastalking':
+      result = await sendViaAfricasTalking(params, config.africastalking)
+      break
+    case 'mock':
+    default:
+      result = await sendViaMock(params)
+  }
+
+  await logSMS(params, result)
   return result
 }
 

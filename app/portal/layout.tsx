@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, CreditCard, Wallet, FileText, User, LogOut, Menu, X, HelpCircle,
-  Package, PlusCircle, ClipboardList
+  Package, PlusCircle, ClipboardList, Shield
 } from 'lucide-react'
+import BottomNav from '@/components/portal/BottomNav'
+import InstallPrompt from '@/components/portal/InstallPrompt'
 
 export default function PortalLayout({
   children,
@@ -25,6 +27,7 @@ export default function PortalLayout({
     { name: 'Payments', href: '/portal/payments', icon: Wallet },
     { name: 'Documents', href: '/portal/documents', icon: FileText },
     { name: 'Profile', href: '/portal/profile', icon: User },
+    { name: 'KYC', href: '/portal/kyc', icon: Shield },
     { name: 'Help', href: '/portal/help', icon: HelpCircle },
   ]
 
@@ -123,18 +126,22 @@ export default function PortalLayout({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-6">
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t mt-auto">
+      {/* Footer - hidden on mobile when bottom nav shows */}
+      <footer className="bg-white border-t mt-auto hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <p className="text-center text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Meek Microfinance. All rights reserved.
           </p>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav />
+      <InstallPrompt />
     </div>
   )
 }
