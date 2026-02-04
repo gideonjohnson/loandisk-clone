@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcrypt'
-import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 import { sendStaffWelcomeEmail } from '@/lib/email/emailService'
 
 /**
@@ -104,6 +103,9 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Seed error:', error)
-    return NextResponse.json({ error: 'Failed to seed database' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Failed to seed database',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    }, { status: 500 })
   }
 }
