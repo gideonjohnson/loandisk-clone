@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight, Bell, Lock, DollarSign, CreditCard } from 'lucide-react'
+import { Save, Building2, Mail, Percent, Shield, ChevronRight, Bell, Lock, DollarSign, CreditCard } from 'lucide-react'
 import { SUPPORTED_CURRENCIES } from '@/lib/currency/currencyConfig'
 
 interface Setting {
@@ -64,8 +64,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'company', label: 'Company', icon: Building2 },
     { id: 'currency', label: 'Currency', icon: DollarSign },
-    { id: 'email', label: 'Email', icon: Mail },
-    { id: 'sms', label: 'SMS', icon: MessageSquare },
+    { id: 'communications', label: 'Communications', icon: Mail, href: '/dashboard/settings/communications' },
     { id: 'loans', label: 'Loan Settings', icon: Percent },
     { id: 'notifications', label: 'Notifications', icon: Bell, href: '/dashboard/settings/notifications' },
     { id: 'payments', label: 'Payments', icon: CreditCard, href: '/dashboard/settings/payments' },
@@ -100,18 +99,6 @@ export default function SettingsPage() {
         { value: '0', label: 'No decimals (1,000)' },
         { value: '2', label: 'Two decimals (1,000.00)' },
       ]},
-    ],
-    email: [
-      { label: 'SMTP Host', description: 'Email server host', type: 'text', defaultValue: '' },
-      { label: 'SMTP Port', description: 'Email server port', type: 'number', defaultValue: '587' },
-      { label: 'SMTP User', description: 'Email username', type: 'text', defaultValue: '' },
-      { label: 'From Email', description: 'Sender email address', type: 'text', defaultValue: '' },
-      { label: 'From Name', description: 'Sender display name', type: 'text', defaultValue: 'Meek Microfinance' },
-    ],
-    sms: [
-      { label: 'SMS Provider', description: 'SMS service provider', type: 'select', defaultValue: 'africastalking' },
-      { label: 'API Key', description: 'SMS provider API key', type: 'password', defaultValue: '' },
-      { label: 'Sender ID', description: 'SMS sender ID', type: 'text', defaultValue: 'MEEK' },
     ],
     loans: [
       { label: 'Default Interest Rate', description: 'Default annual interest rate (%)', type: 'number', defaultValue: '12' },
