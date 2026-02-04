@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CreditCard, Wallet, Calendar, ArrowRight, Bell } from 'lucide-react'
 
@@ -35,6 +36,7 @@ interface PortalDashboard {
 }
 
 export default function PortalDashboard() {
+  const router = useRouter()
   const [data, setData] = useState<PortalDashboard | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -45,6 +47,10 @@ export default function PortalDashboard() {
   const fetchDashboard = async () => {
     try {
       const res = await fetch('/api/portal/dashboard')
+      if (res.status === 401) {
+        router.push('/portal/login')
+        return
+      }
       const result = await res.json()
       setData(result)
     } catch (error) {
