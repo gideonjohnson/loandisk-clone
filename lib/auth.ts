@@ -21,7 +21,8 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
-        sessionDuration: { label: 'Session Duration', type: 'text' }
+        sessionDuration: { label: 'Session Duration', type: 'text' },
+        rememberMe: { label: 'Remember Me', type: 'text' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -51,6 +52,9 @@ export const authOptions: NextAuthOptions = {
         let sessionExpiry: number
         if (isLifetimeUser) {
           sessionExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000 // 1 year
+        } else if (credentials.rememberMe === 'true') {
+          // Remember Me: 30 days
+          sessionExpiry = Date.now() + 30 * 24 * 60 * 60 * 1000
         } else {
           const durationHours = parseInt(credentials.sessionDuration || '24', 10)
           const validDurations = [6, 12, 24]

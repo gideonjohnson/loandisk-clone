@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Building2, Mail, Percent, Shield, ChevronRight, Bell, Lock, DollarSign, CreditCard } from 'lucide-react'
+import { Save, Building2, Mail, Percent, Shield, ChevronRight, Bell, Lock, DollarSign, CreditCard, Palette } from 'lucide-react'
 import { SUPPORTED_CURRENCIES } from '@/lib/currency/currencyConfig'
 
 interface Setting {
@@ -64,6 +64,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'company', label: 'Company', icon: Building2 },
     { id: 'currency', label: 'Currency', icon: DollarSign },
+    { id: 'branding', label: 'Branding', icon: Palette, href: '/dashboard/settings/branding' },
     { id: 'communications', label: 'Communications', icon: Mail, href: '/dashboard/settings/communications' },
     { id: 'loans', label: 'Loan Settings', icon: Percent },
     { id: 'notifications', label: 'Notifications', icon: Bell, href: '/dashboard/settings/notifications' },

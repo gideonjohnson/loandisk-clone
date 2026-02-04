@@ -162,6 +162,33 @@ async function main() {
 
   console.log('Created sample payment:', payment.receiptNumber)
 
+  // Create branding settings
+  const brandingSettings = [
+    { category: 'branding', key: 'branding_company_name', value: 'Meek Microfinance', label: 'Company Name', isPublic: true },
+    { category: 'branding', key: 'branding_logo_url', value: '', label: 'Logo URL', isPublic: true },
+    { category: 'branding', key: 'branding_primary_color', value: '#4169E1', label: 'Primary Color', isPublic: true },
+    { category: 'branding', key: 'branding_secondary_color', value: '#2a4494', label: 'Secondary Color', isPublic: true },
+    { category: 'branding', key: 'branding_login_title', value: 'Welcome Back', label: 'Login Title', isPublic: true },
+    { category: 'branding', key: 'branding_login_subtitle', value: 'Sign in to Meek Loan Management', label: 'Login Subtitle', isPublic: true },
+  ]
+
+  for (const setting of brandingSettings) {
+    await prisma.systemSetting.upsert({
+      where: { key: setting.key },
+      update: {},
+      create: {
+        category: setting.category,
+        key: setting.key,
+        value: setting.value,
+        label: setting.label,
+        isPublic: setting.isPublic,
+        type: 'text',
+      },
+    })
+  }
+
+  console.log('Created branding settings')
+
   console.log('Database seeding completed successfully!')
 }
 

@@ -120,6 +120,35 @@ async function handler(request: Request) {
       )
     }
 
+    // Get user's last login for security info
+    const userDetails = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { lastLogin: true },
+    })
+
+    // Check for device and whether it's new/trusted
+    let isNewDevice = false
+    let deviceId: string | null = null
+    let isTrustedDevice = false
+
+    if (userAgent) {
+      const crypto = await import('crypto')
+      const fingerprint = crypto.createHash('sha256').update(userAgent).digest('hex').substring(0, 32)
+
+      const existingDevice = await prisma.userDevice.findUnique({
+        where: { userId_deviceFingerprint: { userId: user.id, deviceFingerprint: fingerprint } },
+      })
+
+      if (existingDevice) {
+        deviceId = existingDevice.id
+        isTrustedDevice = existingDevice.isTrusted
+        isNewDevice = false
+      } else {
+        // This will be a new device
+        isNewDevice = true
+      }
+    }
+
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
       // Verify 2FA is properly set up
@@ -132,6 +161,10 @@ async function handler(request: Request) {
         return NextResponse.json({
           requires2FA: true,
           userId: user.id,
+          lastLogin: userDetails?.lastLogin,
+          isNewDevice,
+          deviceId,
+          isTrustedDevice,
         })
       }
     }
@@ -153,6 +186,7 @@ async function handler(request: Request) {
     }).catch(() => {})
 
     // Check for new device and create alert
+    let newDeviceId: string | null = deviceId
     if (userAgent) {
       const crypto = await import('crypto')
       const fingerprint = crypto.createHash('sha256').update(userAgent).digest('hex').substring(0, 32)
@@ -162,14 +196,18 @@ async function handler(request: Request) {
 
       if (!existingDevice) {
         // New device - register and alert
-        await prisma.userDevice.create({
+        const createdDevice = await prisma.userDevice.create({
           data: {
             userId: user.id,
             deviceFingerprint: fingerprint,
             lastIpAddress: ipAddress,
             deviceName: userAgent.substring(0, 100),
           },
-        }).catch(() => {})
+        }).catch(() => null)
+
+        if (createdDevice) {
+          newDeviceId = createdDevice.id
+        }
 
         // Only alert if user has logged in before (not first time)
         const loginCount = await prisma.loginHistory.count({ where: { userId: user.id, status: 'SUCCESS' } })
@@ -191,12 +229,17 @@ async function handler(request: Request) {
           where: { id: existingDevice.id },
           data: { lastSeenAt: new Date(), lastIpAddress: ipAddress },
         }).catch(() => {})
+        newDeviceId = existingDevice.id
       }
     }
 
     // No 2FA required
     return NextResponse.json({
       requires2FA: false,
+      lastLogin: userDetails?.lastLogin,
+      isNewDevice,
+      deviceId: newDeviceId,
+      isTrustedDevice,
     })
   } catch (error) {
     console.error('Check 2FA error:', error)

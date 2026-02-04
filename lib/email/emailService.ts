@@ -336,6 +336,65 @@ export const EMAIL_TEMPLATES = {
     text: `URGENT: Dear ${data.borrowerName}, your payment of ${data.amount} for loan #${data.loanNumber} is ${data.daysOverdue} days overdue. Late penalty: ${data.penaltyAmount}. Please make payment immediately.`,
   }),
 
+  PASSWORD_RESET: (data: {
+    userName: string
+    resetUrl: string
+    expiryHours: number
+    companyName: string
+  }) => ({
+    subject: `Password Reset Request - ${data.companyName}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #4169E1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { padding: 20px; background: #f9fafb; }
+          .warning { background: #fef3c7; border: 1px solid #f59e0b; padding: 12px; border-radius: 6px; margin: 15px 0; }
+          .btn { display: inline-block; padding: 14px 28px; background: #4169E1; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 15px 0; }
+          .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+          .link-text { word-break: break-all; font-size: 12px; color: #666; background: #f3f4f6; padding: 8px; border-radius: 4px; margin-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Password Reset Request</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${data.userName},</p>
+            <p>We received a request to reset your password. Click the button below to create a new password:</p>
+
+            <center>
+              <a href="${data.resetUrl}" class="btn">Reset Password</a>
+            </center>
+
+            <p class="link-text">Or copy and paste this link in your browser:<br/>${data.resetUrl}</p>
+
+            <div class="warning">
+              <strong>Important:</strong>
+              <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>This link will expire in ${data.expiryHours} hour(s)</li>
+                <li>If you did not request a password reset, please ignore this email</li>
+                <li>Your password will remain unchanged if you don't click the link</li>
+              </ul>
+            </div>
+
+            <p>For security reasons, this password reset link can only be used once.</p>
+          </div>
+          <div class="footer">
+            <p>${data.companyName} | Loan Management System</p>
+            <p style="color: #999; font-size: 11px;">This is an automated message. Please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Password Reset Request\n\nDear ${data.userName},\n\nWe received a request to reset your password. Visit this link to create a new password:\n\n${data.resetUrl}\n\nThis link will expire in ${data.expiryHours} hour(s).\n\nIf you did not request a password reset, please ignore this email.\n\n${data.companyName}`,
+  }),
+
   STAFF_WELCOME: (data: {
     staffName: string
     email: string
@@ -825,5 +884,32 @@ export async function sendStaffWelcomeEmail(
     html: template.html,
     text: template.text,
     type: 'STAFF_WELCOME',
+  })
+}
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(
+  userEmail: string,
+  userName: string,
+  resetToken: string,
+  baseUrl: string
+): Promise<EmailResult> {
+  const companyName = await getCompanyName()
+  const resetUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`
+  const template = EMAIL_TEMPLATES.PASSWORD_RESET({
+    userName,
+    resetUrl,
+    expiryHours: 1,
+    companyName,
+  })
+
+  return sendEmail({
+    to: userEmail,
+    subject: template.subject,
+    html: template.html,
+    text: template.text,
+    type: 'PASSWORD_RESET',
   })
 }
