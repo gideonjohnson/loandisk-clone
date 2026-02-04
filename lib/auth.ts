@@ -11,7 +11,8 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
+        sessionDuration: { label: 'Session Duration', type: 'text' }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -35,11 +36,18 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials')
         }
 
+        // Calculate session expiry based on selected duration (6, 12, or 24 hours)
+        const durationHours = parseInt(credentials.sessionDuration || '24', 10)
+        const validDurations = [6, 12, 24]
+        const hours = validDurations.includes(durationHours) ? durationHours : 24
+        const sessionExpiry = Date.now() + hours * 60 * 60 * 1000
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role
+          role: user.role,
+          sessionExpiry
         }
       }
     })
@@ -49,10 +57,18 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role
         token.id = user.id
+        token.sessionExpiry = user.sessionExpiry
+      }
+      // Check if session has expired
+      if (token.sessionExpiry && Date.now() > (token.sessionExpiry as number)) {
+        return { ...token, expired: true }
       }
       return token
     },
     async session({ session, token }) {
+      if (token.expired) {
+        throw new Error('Session expired')
+      }
       if (session.user) {
         session.user.role = token.role as string
         session.user.id = token.id as string
@@ -64,7 +80,8 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
   },
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60 // Max 24 hours (actual expiry controlled by sessionExpiry in token)
   },
   secret: process.env.NEXTAUTH_SECRET
 }

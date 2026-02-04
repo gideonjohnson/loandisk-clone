@@ -12,6 +12,7 @@ export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [twoFactorCode, setTwoFactorCode] = useState('')
+  const [sessionDuration, setSessionDuration] = useState('24')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -46,6 +47,7 @@ export default function SignIn() {
           email,
           password,
           twoFactorVerified: 'true',
+          sessionDuration,
           redirect: false,
         })
 
@@ -80,6 +82,7 @@ export default function SignIn() {
         const result = await signIn('credentials', {
           email,
           password,
+          sessionDuration,
           redirect: false,
         })
 
@@ -260,6 +263,22 @@ export default function SignIn() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="sessionDuration" className="block text-sm font-medium text-gray-700 mb-2">
+                  Stay signed in for
+                </label>
+                <select
+                  id="sessionDuration"
+                  value={sessionDuration}
+                  onChange={(e) => setSessionDuration(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-base text-gray-700 focus:ring-2 focus:ring-[#4169E1] focus:border-[#4169E1] transition-all"
+                >
+                  <option value="6">6 hours</option>
+                  <option value="12">12 hours</option>
+                  <option value="24">24 hours</option>
+                </select>
               </div>
 
               {error && (
