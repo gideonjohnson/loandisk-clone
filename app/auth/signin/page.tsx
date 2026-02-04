@@ -31,6 +31,7 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checkingSetup, setCheckingSetup] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [requires2FA, setRequires2FA] = useState(false)
   const [pendingUserId, setPendingUserId] = useState<string | null>(null)
@@ -45,13 +46,26 @@ export default function SignIn() {
     loginSubtitle: 'Sign in to Meek Loan Management',
   })
 
-  // Fetch branding on mount
+  // Check if setup is required and fetch branding on mount
   useEffect(() => {
+    // Check setup status
+    fetch('/api/auth/setup')
+      .then(res => res.json())
+      .then(data => {
+        if (data.setupRequired) {
+          router.push('/auth/setup')
+        } else {
+          setCheckingSetup(false)
+        }
+      })
+      .catch(() => setCheckingSetup(false))
+
+    // Fetch branding
     fetch('/api/public/branding')
       .then(res => res.json())
       .then(data => setBranding(data))
       .catch(() => {})
-  }, [])
+  }, [router])
 
   const formatLastLogin = (dateString: string | null) => {
     if (!dateString) return null
@@ -192,6 +206,15 @@ export default function SignIn() {
     setError('')
     setSecurityInfo(null)
     setTrustDevice(false)
+  }
+
+  // Show loading while checking setup status
+  if (checkingSetup) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#4169E1] to-[#2a4494] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-white" />
+      </div>
+    )
   }
 
   return (
