@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 import { withRateLimit, RATE_LIMITS } from '@/lib/security/rateLimit'
 
 function getClientIP(request: Request): string | null {
@@ -80,7 +80,7 @@ async function handler(request: Request) {
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password)
+    const isPasswordValid = await bcryptjs.compare(password, user.password)
 
     if (!isPasswordValid) {
       await prisma.loginHistory.create({

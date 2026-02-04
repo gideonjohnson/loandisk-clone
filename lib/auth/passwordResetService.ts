@@ -5,7 +5,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { createHash, randomBytes } from 'crypto'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 
 const RESET_TOKEN_EXPIRY_HOURS = 1
 const MAX_RESET_REQUESTS_PER_HOUR = 3
@@ -162,7 +162,7 @@ export async function resetPassword(
   }
 
   // Hash new password
-  const hashedPassword = await bcrypt.hash(newPassword, 10)
+  const hashedPassword = await bcryptjs.hash(newPassword, 10)
 
   // Update password and clear reset token
   await prisma.user.update({

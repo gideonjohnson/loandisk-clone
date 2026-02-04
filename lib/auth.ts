@@ -2,7 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from './prisma'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 
 /**
  * Authorized admin emails with permanent (lifetime) access
@@ -37,7 +37,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials')
         }
 
-        const isPasswordValid = await bcrypt.compare(
+        const isPasswordValid = await bcryptjs.compare(
           credentials.password,
           user.password
         )

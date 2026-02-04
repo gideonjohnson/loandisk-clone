@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createAuthHandler } from '@/lib/middleware/withAuth'
 import { Permission } from '@/lib/permissions'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 
 /**
  * GET /api/users/:id
