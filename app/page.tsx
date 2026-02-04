@@ -251,18 +251,84 @@ export default function Home() {
       <section className="py-12 bg-gray-50 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 dark:text-gray-400 mb-8 text-sm uppercase tracking-wider">Trusted by leading financial institutions</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {['KCB Bank', 'Equity Bank', 'KWFT', 'Faulu', 'SMEP', 'Musoni'].map((client, i) => (
-              <motion.div
-                key={client}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="text-2xl font-bold text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500 transition-colors cursor-default"
-              >
-                {client}
-              </motion.div>
-            ))}
+          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10">
+            {/* KCB Bank - Green */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+            >
+              <div className="w-8 h-8 bg-[#00A651] rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-sm">K</span>
+              </div>
+              <span className="text-lg font-bold text-[#00A651]">KCB Bank</span>
+            </motion.div>
+
+            {/* Equity Bank - Maroon/Red */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+            >
+              <div className="w-8 h-8 bg-[#8B0000] rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-sm">E</span>
+              </div>
+              <span className="text-lg font-bold text-[#8B0000]">Equity Bank</span>
+            </motion.div>
+
+            {/* KWFT - Purple */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+            >
+              <div className="w-8 h-8 bg-[#6B21A8] rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-xs">KW</span>
+              </div>
+              <span className="text-lg font-bold text-[#6B21A8]">KWFT</span>
+            </motion.div>
+
+            {/* Faulu - Orange */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+            >
+              <div className="w-8 h-8 bg-[#F97316] rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-sm">F</span>
+              </div>
+              <span className="text-lg font-bold text-[#F97316]">Faulu</span>
+            </motion.div>
+
+            {/* SMEP - Blue */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+            >
+              <div className="w-8 h-8 bg-[#1D4ED8] rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-xs">SM</span>
+              </div>
+              <span className="text-lg font-bold text-[#1D4ED8]">SMEP</span>
+            </motion.div>
+
+            {/* Musoni - Teal */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+            >
+              <div className="w-8 h-8 bg-[#0D9488] rounded-md flex items-center justify-center">
+                <span className="text-white font-bold text-sm">M</span>
+              </div>
+              <span className="text-lg font-bold text-[#0D9488]">Musoni</span>
+            </motion.div>
           </div>
         </div>
       </section>
