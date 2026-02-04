@@ -603,7 +603,7 @@ export default function Home() {
             {/* Startup */}
             <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Startup</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">For new lenders</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Solo operator just getting started</p>
               <div className="mb-4">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">$59</span>
                 <span className="text-gray-500 dark:text-gray-400">/mo</span>
@@ -636,7 +636,7 @@ export default function Home() {
             {/* Business */}
             <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Business</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">For small teams</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Small office with a few staff members</p>
               <div className="mb-4">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">$129</span>
                 <span className="text-gray-500 dark:text-gray-400">/mo</span>
@@ -672,7 +672,7 @@ export default function Home() {
                 Most Popular
               </div>
               <h3 className="text-lg font-bold text-white mb-1">Growth</h3>
-              <p className="text-white/70 text-sm mb-4">For growing teams</p>
+              <p className="text-white/70 text-sm mb-4">Expanding business with multiple branches</p>
               <div className="mb-4">
                 <span className="text-3xl font-bold text-white">$179</span>
                 <span className="text-white/70">/mo</span>
@@ -705,7 +705,7 @@ export default function Home() {
             {/* Enterprise */}
             <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Enterprise</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">For large teams</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Full-scale operations with no limits</p>
               <div className="mb-4">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">$346</span>
                 <span className="text-gray-500 dark:text-gray-400">/mo</span>
@@ -738,7 +738,7 @@ export default function Home() {
             {/* Custom */}
             <motion.div variants={scaleIn} className="bg-gray-900 dark:bg-gray-800 rounded-2xl p-6 border border-gray-700">
               <h3 className="text-lg font-bold text-white mb-1">Custom</h3>
-              <p className="text-gray-400 text-sm mb-4">10,000+ active loans</p>
+              <p className="text-gray-400 text-sm mb-4">High-volume lenders needing tailored solutions</p>
               <div className="mb-4">
                 <span className="text-2xl font-bold text-white">Contact Us</span>
               </div>
