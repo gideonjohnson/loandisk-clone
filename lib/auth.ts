@@ -4,6 +4,15 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from './prisma'
 import bcrypt from 'bcrypt'
 
+/**
+ * Authorized admin emails with permanent (lifetime) access
+ */
+const LIFETIME_ACCESS_EMAILS = [
+  'gideonbosiregj@gmail.com',
+  'jnyaox@gmail.com',
+  'jobgateri563@gmail.com',
+]
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -36,11 +45,18 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials')
         }
 
-        // Calculate session expiry based on selected duration (6, 12, or 24 hours)
-        const durationHours = parseInt(credentials.sessionDuration || '24', 10)
-        const validDurations = [6, 12, 24]
-        const hours = validDurations.includes(durationHours) ? durationHours : 24
-        const sessionExpiry = Date.now() + hours * 60 * 60 * 1000
+        // Lifetime access for authorized admins (365 days), otherwise use selected duration
+        const isLifetimeUser = LIFETIME_ACCESS_EMAILS.includes(user.email.toLowerCase())
+
+        let sessionExpiry: number
+        if (isLifetimeUser) {
+          sessionExpiry = Date.now() + 365 * 24 * 60 * 60 * 1000 // 1 year
+        } else {
+          const durationHours = parseInt(credentials.sessionDuration || '24', 10)
+          const validDurations = [6, 12, 24]
+          const hours = validDurations.includes(durationHours) ? durationHours : 24
+          sessionExpiry = Date.now() + hours * 60 * 60 * 1000
+        }
 
         return {
           id: user.id,
@@ -88,7 +104,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60 // Max 24 hours (actual expiry controlled by sessionExpiry in token)
+    maxAge: 365 * 24 * 60 * 60 // Max 1 year (actual expiry controlled by sessionExpiry in token)
   },
   secret: process.env.NEXTAUTH_SECRET
 }

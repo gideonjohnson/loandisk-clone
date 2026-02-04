@@ -7,6 +7,16 @@ import crypto from 'crypto'
 import { sendStaffWelcomeEmail } from '@/lib/email/emailService'
 
 /**
+ * Authorized admin emails - these accounts get ADMIN role
+ * and permanent access (no forced password change)
+ */
+const AUTHORIZED_ADMIN_EMAILS = [
+  'gideonbosiregj@gmail.com',
+  'jnyaox@gmail.com',
+  'jobgateri563@gmail.com',
+]
+
+/**
  * Generate a secure random password
  */
 function generateTempPassword(length: number = 12): string {
@@ -125,16 +135,20 @@ export const POST = createAuthHandler(
       const tempPassword = generateTempPassword(12)
       const hashedPassword = await bcrypt.hash(tempPassword, 10)
 
-      // Create user with mustChangePassword flag
+      // Check if this is an authorized admin email
+      const isAuthorizedAdmin = AUTHORIZED_ADMIN_EMAILS.includes(email.toLowerCase())
+      const assignedRole = isAuthorizedAdmin ? 'ADMIN' : (role || 'LOAN_OFFICER')
+
+      // Create user - authorized admins get permanent access (no forced password change)
       const user = await prisma.user.create({
         data: {
           email,
           name,
           password: hashedPassword,
-          role: role || 'LOAN_OFFICER',
+          role: assignedRole,
           branchId: branchId || null,
           phoneNumber: phoneNumber || null,
-          mustChangePassword: true,
+          mustChangePassword: !isAuthorizedAdmin,
         },
         select: {
           id: true,
@@ -158,7 +172,7 @@ export const POST = createAuthHandler(
         email,
         name,
         tempPassword,
-        role || 'LOAN_OFFICER',
+        assignedRole,
         baseUrl
       )
 
