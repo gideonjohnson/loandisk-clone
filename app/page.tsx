@@ -251,83 +251,96 @@ export default function Home() {
       <section className="py-12 bg-gray-50 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 dark:text-gray-400 mb-8 text-sm uppercase tracking-wider">Trusted by leading financial institutions</p>
-          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-10">
-            {/* KCB Bank - Green */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8 items-center justify-items-center">
+            {/* KCB Bank */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+              className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
             >
-              <div className="w-8 h-8 bg-[#00A651] rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-sm">K</span>
-              </div>
-              <span className="text-lg font-bold text-[#00A651]">KCB Bank</span>
+              <svg viewBox="0 0 120 40" className="h-8 md:h-10 w-auto">
+                <rect x="0" y="5" width="30" height="30" rx="4" fill="#00A651"/>
+                <text x="15" y="27" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">K</text>
+                <text x="40" y="28" fill="#00A651" fontSize="22" fontWeight="bold" fontFamily="Arial">KCB</text>
+              </svg>
+              <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Kenya Commercial Bank</span>
             </motion.div>
 
-            {/* Equity Bank - Maroon/Red */}
+            {/* Equity Bank */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
+            >
+              <svg viewBox="0 0 120 40" className="h-8 md:h-10 w-auto">
+                <rect x="0" y="5" width="30" height="30" rx="4" fill="#8B1538"/>
+                <text x="15" y="27" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">E</text>
+                <text x="75" y="28" textAnchor="middle" fill="#8B1538" fontSize="16" fontWeight="bold" fontFamily="Arial">EQUITY</text>
+              </svg>
+              <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Equity Bank Group</span>
+            </motion.div>
+
+            {/* KWFT */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+              className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
             >
-              <div className="w-8 h-8 bg-[#8B0000] rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-sm">E</span>
-              </div>
-              <span className="text-lg font-bold text-[#8B0000]">Equity Bank</span>
+              <svg viewBox="0 0 100 40" className="h-8 md:h-10 w-auto">
+                <circle cx="20" cy="20" r="18" fill="#E91E63"/>
+                <text x="20" y="26" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial">KW</text>
+                <text x="60" y="28" fill="#E91E63" fontSize="18" fontWeight="bold" fontFamily="Arial">FT</text>
+              </svg>
+              <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Kenya Women Finance</span>
             </motion.div>
 
-            {/* KWFT - Purple */}
+            {/* Faulu */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
+            >
+              <svg viewBox="0 0 100 40" className="h-8 md:h-10 w-auto">
+                <path d="M5 35 L20 5 L35 35 Z" fill="#E65100"/>
+                <circle cx="20" cy="22" r="6" fill="white"/>
+                <text x="65" y="28" textAnchor="middle" fill="#E65100" fontSize="18" fontWeight="bold" fontFamily="Arial">faulu</text>
+              </svg>
+              <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Faulu Microfinance</span>
+            </motion.div>
+
+            {/* SMEP */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+              className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
             >
-              <div className="w-8 h-8 bg-[#6B21A8] rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-xs">KW</span>
-              </div>
-              <span className="text-lg font-bold text-[#6B21A8]">KWFT</span>
+              <svg viewBox="0 0 100 40" className="h-8 md:h-10 w-auto">
+                <rect x="0" y="8" width="24" height="24" rx="12" fill="#1565C0"/>
+                <text x="12" y="26" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="Arial">$</text>
+                <text x="60" y="28" fill="#1565C0" fontSize="18" fontWeight="bold" fontFamily="Arial">SMEP</text>
+              </svg>
+              <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">SMEP Microfinance</span>
             </motion.div>
 
-            {/* Faulu - Orange */}
+            {/* Musoni */}
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
             >
-              <div className="w-8 h-8 bg-[#F97316] rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-sm">F</span>
-              </div>
-              <span className="text-lg font-bold text-[#F97316]">Faulu</span>
-            </motion.div>
-
-            {/* SMEP - Blue */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
-            >
-              <div className="w-8 h-8 bg-[#1D4ED8] rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-xs">SM</span>
-              </div>
-              <span className="text-lg font-bold text-[#1D4ED8]">SMEP</span>
-            </motion.div>
-
-            {/* Musoni - Teal */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-default"
-            >
-              <div className="w-8 h-8 bg-[#0D9488] rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
-              </div>
-              <span className="text-lg font-bold text-[#0D9488]">Musoni</span>
+              <svg viewBox="0 0 110 40" className="h-8 md:h-10 w-auto">
+                <circle cx="15" cy="20" r="12" fill="#00897B"/>
+                <circle cx="15" cy="20" r="6" fill="white"/>
+                <circle cx="15" cy="20" r="3" fill="#00897B"/>
+                <text x="70" y="28" textAnchor="middle" fill="#00897B" fontSize="16" fontWeight="bold" fontFamily="Arial">musoni</text>
+              </svg>
+              <span className="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">Musoni System</span>
             </motion.div>
           </div>
         </div>
