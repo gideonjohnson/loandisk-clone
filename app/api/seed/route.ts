@@ -1,9 +1,39 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
+import { sendStaffWelcomeEmail } from '@/lib/email/emailService'
+
+/**
+ * Generate a secure random password
+ */
+function generateTempPassword(length: number = 12): string {
+  const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const lowercase = 'abcdefghjkmnpqrstuvwxyz'
+  const numbers = '23456789'
+  const special = '!@#$%&*'
+  const allChars = uppercase + lowercase + numbers + special
+
+  let password = ''
+  password += uppercase[Math.floor(Math.random() * uppercase.length)]
+  password += lowercase[Math.floor(Math.random() * lowercase.length)]
+  password += numbers[Math.floor(Math.random() * numbers.length)]
+  password += special[Math.floor(Math.random() * special.length)]
+
+  for (let i = password.length; i < length; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)]
+  }
+
+  return password.split('').sort(() => Math.random() - 0.5).join('')
+}
+
+const ADMIN_ACCOUNTS = [
+  { email: 'gideonbosiregj@gmail.com', name: 'Gideon Bosire' },
+  { email: 'jnyaox@gmail.com', name: 'J Nyao' },
+  { email: 'jobgateri563@gmail.com', name: 'Job Gateri' },
+]
 
 export async function POST(request: Request) {
-  // Check for secret key to prevent unauthorized seeding
   const { searchParams } = new URL(request.url)
   const key = searchParams.get('key')
 
@@ -12,42 +42,65 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Create admin user
-    const hashedPassword = await bcrypt.hash('admin123', 10)
+    const baseUrl = process.env.NEXTAUTH_URL || (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'https://meekfund.ink')
 
-    const admin = await prisma.user.upsert({
-      where: { email: 'admin@meek.com' },
-      update: {},
-      create: {
-        email: 'admin@meek.com',
-        name: 'Admin User',
-        password: hashedPassword,
-        role: 'ADMIN',
-        active: true,
-      },
-    })
+    const results = []
 
-    // Create a loan officer
-    const loanOfficerPassword = await bcrypt.hash('officer123', 10)
+    for (const account of ADMIN_ACCOUNTS) {
+      // Check if already exists
+      const existing = await prisma.user.findUnique({
+        where: { email: account.email },
+      })
 
-    const loanOfficer = await prisma.user.upsert({
-      where: { email: 'officer@meek.com' },
-      update: {},
-      create: {
-        email: 'officer@meek.com',
-        name: 'Loan Officer',
-        password: loanOfficerPassword,
-        role: 'LOAN_OFFICER',
-        active: true,
-      },
-    })
+      if (existing) {
+        results.push({
+          email: account.email,
+          status: 'already_exists',
+          role: existing.role,
+          emailSent: false,
+        })
+        continue
+      }
+
+      // Generate secure password
+      const tempPassword = generateTempPassword(12)
+      const hashedPassword = await bcrypt.hash(tempPassword, 10)
+
+      // Create admin user with permanent access
+      const user = await prisma.user.create({
+        data: {
+          email: account.email,
+          name: account.name,
+          password: hashedPassword,
+          role: 'ADMIN',
+          active: true,
+          mustChangePassword: false,
+        },
+      })
+
+      // Send welcome email with credentials
+      const emailResult = await sendStaffWelcomeEmail(
+        account.email,
+        account.name,
+        tempPassword,
+        'ADMIN',
+        baseUrl
+      )
+
+      results.push({
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        status: 'created',
+        emailSent: emailResult.success,
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      users: [
-        { email: admin.email, role: admin.role },
-        { email: loanOfficer.email, role: loanOfficer.role },
-      ],
+      accounts: results,
     })
   } catch (error) {
     console.error('Seed error:', error)
