@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight, Bell, Lock, DollarSign } from 'lucide-react'
+import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight, Bell, Lock, DollarSign, CreditCard } from 'lucide-react'
 import { SUPPORTED_CURRENCIES } from '@/lib/currency/currencyConfig'
 
 interface Setting {
@@ -68,6 +68,7 @@ export default function SettingsPage() {
     { id: 'sms', label: 'SMS', icon: MessageSquare },
     { id: 'loans', label: 'Loan Settings', icon: Percent },
     { id: 'notifications', label: 'Notifications', icon: Bell, href: '/dashboard/settings/notifications' },
+    { id: 'payments', label: 'Payments', icon: CreditCard, href: '/dashboard/settings/payments' },
     { id: 'permissions', label: 'Permissions', icon: Lock, href: '/dashboard/settings/permissions' },
     { id: 'security', label: 'Security', icon: Shield, href: '/dashboard/settings/security' },
   ]

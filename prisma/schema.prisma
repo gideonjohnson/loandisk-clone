@@ -80,6 +80,7 @@ model Borrower {
   preference        BorrowerPreference?
   signatureRequests SignatureRequest[]
   kycVerifications  KYCVerification[]
+  paymentTransactions PaymentTransaction[]
 }
 
 model Loan {
@@ -121,6 +122,7 @@ model Loan {
   fraudChecks       FraudCheck[]
   signatureRequests SignatureRequest[]
   riskScores        LoanRiskScore[]
+  paymentTransactions PaymentTransaction[]
 }
 
 model LoanSchedule {
@@ -169,6 +171,8 @@ model Payment {
 
   loan              Loan          @relation(fields: [loanId], references: [id])
   receivedByUser    User          @relation(fields: [receivedBy], references: [id])
+  transactionId     String?
+  transaction       PaymentTransaction? @relation(fields: [transactionId], references: [id])
 }
 
 model Collateral {
@@ -712,4 +716,34 @@ model BatchJob {
   updatedAt        DateTime  @updatedAt
 
   user             User      @relation(fields: [createdBy], references: [id])
+}
+
+// ============================================================
+// Payment Transaction Models (M-Pesa, Airtel, Bank)
+// ============================================================
+
+model PaymentTransaction {
+  id                  String    @id @default(cuid())
+  provider            String    // MPESA, AIRTEL, BANK
+  transactionType     String    // STK_PUSH, C2B, B2C, BANK_TRANSFER
+  checkoutRequestId   String?
+  merchantRequestId   String?
+  mpesaReceiptNumber  String?
+  airtelTransactionId String?
+  bankReference       String?
+  phoneNumber         String?
+  amount              Decimal
+  accountReference    String?
+  status              String    @default("PENDING") // PENDING, COMPLETED, FAILED, CANCELLED
+  resultCode          String?
+  resultDesc          String?
+  loanId              String?
+  borrowerId          String?
+  transactionDate     DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  loan                Loan?     @relation(fields: [loanId], references: [id])
+  borrower            Borrower? @relation(fields: [borrowerId], references: [id])
+  payments            Payment[]
 }
