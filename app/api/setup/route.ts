@@ -389,6 +389,19 @@ export async function POST(request: Request) {
       END $$`)
     }
 
+    // -- Remove demo/seed accounts --
+    const demoEmails = ['admin@meek.com', 'officer@meek.com']
+    for (const demoEmail of demoEmails) {
+      try {
+        const deleted = await prisma.$executeRawUnsafe(
+          `DELETE FROM "User" WHERE "email" = '${demoEmail}'`
+        )
+        results.push(deleted > 0 ? `DELETED: ${demoEmail}` : `SKIP: ${demoEmail} (not found)`)
+      } catch (e) {
+        results.push(`SKIP: delete ${demoEmail} - ${e instanceof Error ? e.message : 'error'}`)
+      }
+    }
+
     return NextResponse.json({ success: true, results })
   } catch (error) {
     console.error('Setup error:', error)

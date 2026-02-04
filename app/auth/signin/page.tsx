@@ -481,12 +481,6 @@ export default function SignIn() {
                 )}
               </motion.button>
 
-              <div className="pt-4 border-t text-center">
-                <p className="text-sm text-gray-500 mb-2">Demo credentials:</p>
-                <p className="font-mono text-xs text-gray-700 bg-gray-100 rounded-lg py-2 px-3 inline-block">
-                  admin@meek.com / admin123
-                </p>
-              </div>
             </form>
           )}
         </motion.div>
