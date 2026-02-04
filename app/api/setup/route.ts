@@ -406,7 +406,6 @@ export async function POST(request: Request) {
         await prisma.$executeRawUnsafe(
           `DELETE FROM "KYCVerification" WHERE "reviewedBy" IN (SELECT "id" FROM "User" WHERE "email" = '${demoEmail}')`
         )
-        }
         const deleted = await prisma.$executeRawUnsafe(
           `DELETE FROM "User" WHERE "email" = '${demoEmail}'`
         )
