@@ -11,19 +11,20 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
-  name              String
-  password          String
-  role              String   @default("LOAN_OFFICER")
-  branchId          String?
-  phoneNumber       String?
-  lastLogin         DateTime?
-  twoFactorEnabled  Boolean  @default(false)
-  profileImage      String?
-  active            Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  name                String
+  password            String
+  role                String   @default("LOAN_OFFICER")
+  branchId            String?
+  phoneNumber         String?
+  lastLogin           DateTime?
+  twoFactorEnabled    Boolean  @default(false)
+  mustChangePassword  Boolean  @default(false)
+  profileImage        String?
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   branch            Branch?  @relation(fields: [branchId], references: [id])
   loans             Loan[]   @relation("LoanOfficer")

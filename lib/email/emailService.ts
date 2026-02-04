@@ -335,6 +335,78 @@ export const EMAIL_TEMPLATES = {
     `,
     text: `URGENT: Dear ${data.borrowerName}, your payment of ${data.amount} for loan #${data.loanNumber} is ${data.daysOverdue} days overdue. Late penalty: ${data.penaltyAmount}. Please make payment immediately.`,
   }),
+
+  STAFF_WELCOME: (data: {
+    staffName: string
+    email: string
+    tempPassword: string
+    role: string
+    loginUrl: string
+    companyName: string
+  }) => ({
+    subject: `Welcome to ${data.companyName} - Your Account Credentials`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #4169E1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { padding: 20px; background: #f9fafb; }
+          .credentials { background: white; padding: 20px; border: 2px solid #4169E1; border-radius: 8px; margin: 20px 0; }
+          .credential-item { margin: 10px 0; }
+          .label { color: #666; font-size: 12px; text-transform: uppercase; }
+          .value { font-size: 18px; font-weight: bold; color: #333; font-family: monospace; background: #f3f4f6; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+          .warning { background: #fef3c7; border: 1px solid #f59e0b; padding: 12px; border-radius: 6px; margin: 15px 0; }
+          .btn { display: inline-block; padding: 14px 28px; background: #4169E1; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 15px; }
+          .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Welcome to ${data.companyName}!</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${data.staffName},</p>
+            <p>Your staff account has been created. Below are your login credentials:</p>
+
+            <div class="credentials">
+              <div class="credential-item">
+                <div class="label">Email</div>
+                <div class="value">${data.email}</div>
+              </div>
+              <div class="credential-item">
+                <div class="label">Temporary Password</div>
+                <div class="value">${data.tempPassword}</div>
+              </div>
+              <div class="credential-item">
+                <div class="label">Role</div>
+                <div class="value">${data.role}</div>
+              </div>
+            </div>
+
+            <div class="warning">
+              <strong>⚠️ Important:</strong> You will be required to change your password upon first login. Please keep your credentials secure and do not share them with anyone.
+            </div>
+
+            <center>
+              <a href="${data.loginUrl}" class="btn">Login to Your Account</a>
+            </center>
+
+            <p style="margin-top: 20px;">If you have any questions, please contact your administrator.</p>
+          </div>
+          <div class="footer">
+            <p>${data.companyName} | Loan Management System</p>
+            <p style="color: #999; font-size: 11px;">This is an automated message. Please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `Welcome to ${data.companyName}!\n\nDear ${data.staffName},\n\nYour staff account has been created.\n\nEmail: ${data.email}\nTemporary Password: ${data.tempPassword}\nRole: ${data.role}\n\nPlease login at: ${data.loginUrl}\n\nIMPORTANT: You will be required to change your password upon first login.\n\n${data.companyName}`,
+  }),
 }
 
 /**
@@ -724,5 +796,34 @@ export async function sendPaymentOverdueEmail(
     borrowerId,
     loanId,
     type: 'PAYMENT_OVERDUE',
+  })
+}
+
+/**
+ * Send staff welcome email with credentials
+ */
+export async function sendStaffWelcomeEmail(
+  staffEmail: string,
+  staffName: string,
+  tempPassword: string,
+  role: string,
+  baseUrl: string
+): Promise<EmailResult> {
+  const companyName = await getCompanyName()
+  const template = EMAIL_TEMPLATES.STAFF_WELCOME({
+    staffName,
+    email: staffEmail,
+    tempPassword,
+    role: role.replace(/_/g, ' '),
+    loginUrl: `${baseUrl}/auth/signin`,
+    companyName,
+  })
+
+  return sendEmail({
+    to: staffEmail,
+    subject: template.subject,
+    html: template.html,
+    text: template.text,
+    type: 'STAFF_WELCOME',
   })
 }

@@ -16,7 +16,19 @@
       "Bash(curl:*)",
       "Bash(npx vercel:*)",
       "Bash(\"C:/Users/Administrator/loandisk-clone/app/api/notifications/[id]/read/route.ts\")",
-      "Bash(\"C:/Users/Administrator/loandisk-clone/app/api/notifications/[id]/route.ts\")"
+      "Bash(\"C:/Users/Administrator/loandisk-clone/app/api/notifications/[id]/route.ts\")",
+      "WebFetch(domain:meekfund.ink)",
+      "Bash(nslookup:*)",
+      "Bash(ipconfig:*)",
+      "Bash(netsh interface ipv4 show interfaces:*)",
+      "Bash(netsh interface ipv4 set dns:*)",
+      "Bash(netsh interface ipv4 add dns:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(sudo netsh interface ipv4 set dns name=\"Wi-Fi\" static 8.8.8.8 primary)",
+      "Bash(git push:*)",
+      "Bash(vercel:*)",
+      "WebFetch(domain:loandisk.com)",
+      "WebFetch(domain:www.loandisk.com)"
     ]
   }
 }

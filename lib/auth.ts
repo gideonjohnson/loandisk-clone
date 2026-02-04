@@ -47,17 +47,23 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          mustChangePassword: user.mustChangePassword,
           sessionExpiry
         }
       }
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role
         token.id = user.id
         token.sessionExpiry = user.sessionExpiry
+        token.mustChangePassword = user.mustChangePassword
+      }
+      // Handle session update (e.g., after password change)
+      if (trigger === 'update' && session?.mustChangePassword !== undefined) {
+        token.mustChangePassword = session.mustChangePassword
       }
       // Check if session has expired
       if (token.sessionExpiry && Date.now() > (token.sessionExpiry as number)) {
@@ -72,6 +78,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.role = token.role as string
         session.user.id = token.id as string
+        session.user.mustChangePassword = token.mustChangePassword as boolean
       }
       return session
     }

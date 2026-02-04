@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Mail, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface Branch {
   id: string
@@ -16,12 +16,11 @@ export default function NewUserPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState<{ message: string; emailSent: boolean } | null>(null)
 
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    password: '',
-    confirmPassword: '',
     role: 'LOAN_OFFICER',
     branchId: '',
     phoneNumber: '',
@@ -37,17 +36,7 @@ export default function NewUserPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters')
-      return
-    }
-
+    setSuccess(null)
     setLoading(true)
 
     try {
@@ -57,7 +46,6 @@ export default function NewUserPage() {
         body: JSON.stringify({
           email: formData.email,
           name: formData.name,
-          password: formData.password,
           role: formData.role,
           branchId: formData.branchId || null,
           phoneNumber: formData.phoneNumber || null,
@@ -70,7 +58,15 @@ export default function NewUserPage() {
         throw new Error(data.error || 'Failed to create user')
       }
 
-      router.push('/dashboard/users')
+      setSuccess({
+        message: data.message,
+        emailSent: data.emailSent
+      })
+
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        router.push('/dashboard/users')
+      }, 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -89,11 +85,33 @@ export default function NewUserPage() {
       </Link>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New User</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Create New User</h1>
+        <p className="text-gray-500 mb-6">
+          A secure password will be generated and sent to the user&apos;s email address.
+        </p>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-            {error}
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {success && (
+          <div className={`mb-4 p-4 rounded-lg flex items-start gap-3 ${
+            success.emailSent
+              ? 'bg-green-50 border border-green-200 text-green-700'
+              : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
+          }`}>
+            {success.emailSent ? (
+              <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            )}
+            <div>
+              <p className="font-medium">{success.message}</p>
+              <p className="text-sm mt-1">Redirecting to users list...</p>
+            </div>
           </div>
         )}
 
@@ -108,7 +126,9 @@ export default function NewUserPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                disabled={!!success}
+                placeholder="John Doe"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               />
             </div>
 
@@ -116,40 +136,21 @@ export default function NewUserPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address *
               </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password *
-              </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-                minLength={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password *
-              </label>
-              <input
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative">
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  disabled={!!success}
+                  placeholder="john@company.com"
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                />
+                <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Login credentials will be sent to this email
+              </p>
             </div>
 
             <div>
@@ -159,7 +160,8 @@ export default function NewUserPage() {
               <select
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                disabled={!!success}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               >
                 <option value="ADMIN">Admin</option>
                 <option value="MANAGER">Manager</option>
@@ -179,7 +181,8 @@ export default function NewUserPage() {
               <select
                 value={formData.branchId}
                 onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                disabled={!!success}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               >
                 <option value="">No Branch (HQ)</option>
                 {branches.map((branch) => (
@@ -198,9 +201,24 @@ export default function NewUserPage() {
                 type="tel"
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                disabled={!!success}
                 placeholder="+254..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               />
+            </div>
+          </div>
+
+          {/* Info box about password */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Mail className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium">Secure Password Delivery</p>
+                <p className="mt-1">
+                  A temporary password will be automatically generated and sent to the user&apos;s email.
+                  They will be required to change it on their first login.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -213,10 +231,10 @@ export default function NewUserPage() {
             </Link>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !!success}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create User'}
+              {loading ? 'Creating & Sending Email...' : 'Create User & Send Credentials'}
             </button>
           </div>
         </form>

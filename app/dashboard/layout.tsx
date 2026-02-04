@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Users, DollarSign, CreditCard, BarChart3, Settings,
   LogOut, Wallet, Menu, X, Building2, Briefcase, FileText, Bell,
@@ -18,9 +18,17 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const pathname = usePathname()
+  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Redirect to change password page if mustChangePassword is true
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.mustChangePassword) {
+      router.push('/auth/change-password')
+    }
+  }, [session, status, router])
 
   const navigation: Array<{
     name: string
