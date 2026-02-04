@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/prisma'
+import { notificationBroadcaster, createNotificationPayload } from './notificationBroadcaster'
 
 export type NotificationType =
   | 'LOAN_APPROVED'
@@ -46,10 +47,10 @@ interface UserInfo {
 }
 
 /**
- * Create a notification record in the database
+ * Create a notification record in the database and broadcast to connected clients
  */
 export async function createNotification(payload: CreateNotificationPayload) {
-  return prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: {
       userId: payload.userId,
       type: payload.type,
@@ -60,6 +61,21 @@ export async function createNotification(payload: CreateNotificationPayload) {
       createdAt: new Date(),
     },
   })
+
+  // Broadcast to connected clients
+  notificationBroadcaster.broadcastToUser(
+    payload.userId,
+    createNotificationPayload({
+      id: notification.id,
+      type: notification.type,
+      category: notification.category,
+      title: notification.title,
+      message: notification.message,
+      createdAt: notification.createdAt,
+    })
+  )
+
+  return notification
 }
 
 /**

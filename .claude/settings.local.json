@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:webdevcode.com)",
+      "Bash(npx eslint:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(ls \"C:\\\\Users\\\\Administrator\\\\loandisk-clone\\\\public\\\\icons\"\" 2>/dev/null || mkdir -p \"C:UsersAdministratorloandisk-clonepublicicons \")",
+      "Bash(npm run build:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(npx vercel:*)",
+      "Bash(\"C:/Users/Administrator/loandisk-clone/app/api/notifications/[id]/read/route.ts\")",
+      "Bash(\"C:/Users/Administrator/loandisk-clone/app/api/notifications/[id]/route.ts\")"
+    ]
+  }
+}

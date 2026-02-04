@@ -6,12 +6,13 @@ import { applyDisbursementFees } from '@/lib/fees/disbursementFeeService'
 import { sendLoanDisbursedNotification } from '@/lib/notifications/notificationService'
 import { sendLoanDisbursedSMS } from '@/lib/sms/smsService'
 import { sendLoanDisbursedEmail } from '@/lib/email/emailService'
+import { withRateLimit, RATE_LIMITS } from '@/lib/security/rateLimit'
 
 /**
  * POST /api/loans/:id/disburse
  * Disburse an approved loan
  */
-export const POST = createAuthHandler(
+const handler = createAuthHandler(
   async (request: Request, session, context) => {
     try {
       const { id } = context.params
@@ -213,3 +214,5 @@ export const POST = createAuthHandler(
   [Permission.LOAN_DISBURSE],
   false
 )
+
+export const POST = withRateLimit(handler, RATE_LIMITS.SENSITIVE)

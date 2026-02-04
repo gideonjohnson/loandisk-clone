@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { calculateLoan, generateLoanNumber } from '@/lib/utils/loanCalculator'
 import { runFraudCheck } from '@/lib/fraud/fraudDetectionService'
+import { withRateLimit, RATE_LIMITS } from '@/lib/security/rateLimit'
 
-export async function GET() {
+async function getHandler() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -40,7 +41,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+async function postHandler(request: Request) {
   try {
     const session = await getServerSession(authOptions)
     
@@ -120,3 +121,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withRateLimit(getHandler, RATE_LIMITS.READ)
+export const POST = withRateLimit(postHandler, RATE_LIMITS.WRITE)

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
+import { withRateLimit, RATE_LIMITS } from '@/lib/security/rateLimit'
 
 function getClientIP(request: Request): string | null {
   const forwarded = request.headers.get('x-forwarded-for')
@@ -12,7 +13,7 @@ function getClientIP(request: Request): string | null {
  * POST /api/auth/check-2fa
  * Check credentials and whether user has 2FA enabled
  */
-export async function POST(request: Request) {
+async function handler(request: Request) {
   try {
     const body = await request.json()
     const { email, password } = body
@@ -205,3 +206,5 @@ export async function POST(request: Request) {
     )
   }
 }
+
+export const POST = withRateLimit(handler, RATE_LIMITS.AUTH)

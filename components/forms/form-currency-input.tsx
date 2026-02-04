@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { getCurrencyConfig, DEFAULT_CURRENCY } from "@/lib/currency/currencyConfig"
 
 interface FormCurrencyInputProps {
   name: string
@@ -29,9 +30,10 @@ export function FormCurrencyInput({
   description,
   disabled = false,
   className,
-  currency = "USD",
+  currency = DEFAULT_CURRENCY,
 }: FormCurrencyInputProps) {
   const form = useFormContext()
+  const currencyConfig = getCurrencyConfig(currency)
 
   const formatCurrency = (value: string) => {
     // Remove non-numeric characters except decimal point
@@ -43,9 +45,10 @@ export function FormCurrencyInput({
       return parts[0] + "." + parts.slice(1).join("")
     }
 
-    // Limit to 2 decimal places
-    if (parts[1] && parts[1].length > 2) {
-      return `${parts[0]}.${parts[1].slice(0, 2)}`
+    // Limit decimal places based on currency config
+    const maxDecimals = currencyConfig.decimalPlaces
+    if (parts[1] && parts[1].length > maxDecimals) {
+      return `${parts[0]}.${parts[1].slice(0, maxDecimals)}`
     }
 
     return numericValue
@@ -60,15 +63,15 @@ export function FormCurrencyInput({
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                $
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                {currencyConfig.symbol}
               </span>
               <Input
                 type="text"
                 inputMode="decimal"
                 placeholder={placeholder}
                 disabled={disabled}
-                className="pl-7"
+                className="pl-10"
                 {...field}
                 value={field.value || ""}
                 onChange={(e) => {

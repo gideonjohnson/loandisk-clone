@@ -39,6 +39,7 @@ model User {
   sessions          UserSession[]
   securityAlerts    SecurityAlert[]
   kycReviews        KYCVerification[]
+  batchJobs         BatchJob[]
 }
 
 model Borrower {
@@ -101,6 +102,7 @@ model Loan {
   rejectionReason   String?
   collateralValue   Decimal?
   loanProduct       String?
+  currency          String      @default("KES")
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
@@ -160,6 +162,7 @@ model Payment {
   reversalReason    String?
   isReversed        Boolean       @default(false)
   originalPaymentId String?
+  currency          String        @default("KES")
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 
@@ -421,6 +424,7 @@ model LoanProduct {
   requiresCollateral Boolean @default(false)
   requiresGuarantor Boolean @default(false)
   minCreditScore    Int?
+  currency          String   @default("KES")
   active            Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -635,6 +639,13 @@ model KYCVerification {
   amlCheckDate    DateTime?
   amlFlags        String?
 
+  // Third-party provider fields
+  providerId        String?
+  providerName      String?
+  providerResult    String?
+  providerScore     Int?
+  providerVerifiedAt DateTime?
+
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -678,4 +689,26 @@ model LoanRiskScore {
   calculatedAt        DateTime @default(now())
 
   loan                Loan     @relation(fields: [loanId], references: [id])
+}
+
+// ============================================================
+// Batch Processing Models
+// ============================================================
+
+model BatchJob {
+  id               String    @id @default(cuid())
+  type             String    // LOAN_IMPORT, PAYMENT_IMPORT, BORROWER_IMPORT
+  status           String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  fileName         String?
+  totalRecords     Int       @default(0)
+  processedRecords Int       @default(0)
+  successCount     Int       @default(0)
+  errorCount       Int       @default(0)
+  errors           String?   // JSON array of error details
+  createdBy        String
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user             User      @relation(fields: [createdBy], references: [id])
 }

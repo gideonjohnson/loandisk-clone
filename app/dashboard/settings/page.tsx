@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight, Bell, Lock } from 'lucide-react'
+import { Save, Building2, Mail, MessageSquare, Percent, Shield, ChevronRight, Bell, Lock, DollarSign } from 'lucide-react'
+import { SUPPORTED_CURRENCIES } from '@/lib/currency/currencyConfig'
 
 interface Setting {
   id: string
@@ -62,6 +63,7 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'company', label: 'Company', icon: Building2 },
+    { id: 'currency', label: 'Currency', icon: DollarSign },
     { id: 'email', label: 'Email', icon: Mail },
     { id: 'sms', label: 'SMS', icon: MessageSquare },
     { id: 'loans', label: 'Loan Settings', icon: Percent },
@@ -72,14 +74,31 @@ export default function SettingsPage() {
 
   const filteredSettings = settings.filter((s) => s.category === activeTab)
 
+  // Currency options from config
+  const currencyOptions = Object.values(SUPPORTED_CURRENCIES).map((c) => ({
+    value: c.code,
+    label: `${c.code} - ${c.name} (${c.symbol})`,
+  }))
+
   // Default settings structure if none exist
-  const defaultSettings: Record<string, { label: string; description: string; type: string; defaultValue: string }[]> = {
+  const defaultSettings: Record<string, { label: string; description: string; type: string; defaultValue: string; options?: { value: string; label: string }[] }[]> = {
     company: [
       { label: 'Company Name', description: 'Your organization name', type: 'text', defaultValue: 'Meek Microfinance' },
       { label: 'Company Email', description: 'Main contact email', type: 'text', defaultValue: 'info@meek.co.ke' },
       { label: 'Company Phone', description: 'Main contact phone', type: 'text', defaultValue: '+254700000000' },
       { label: 'Company Address', description: 'Physical address', type: 'text', defaultValue: 'Nairobi, Kenya' },
-      { label: 'Currency', description: 'Default currency', type: 'text', defaultValue: 'KES' },
+    ],
+    currency: [
+      { label: 'Default Currency', description: 'Primary currency for new loans and transactions', type: 'currency-select', defaultValue: 'KES', options: currencyOptions },
+      { label: 'Display Format', description: 'How currency amounts are displayed', type: 'select', defaultValue: 'symbol', options: [
+        { value: 'symbol', label: 'Symbol (e.g., KSh 1,000)' },
+        { value: 'code', label: 'Code (e.g., KES 1,000)' },
+        { value: 'both', label: 'Both (e.g., KSh 1,000 KES)' },
+      ]},
+      { label: 'Decimal Places', description: 'Number of decimal places for currency', type: 'select', defaultValue: '2', options: [
+        { value: '0', label: 'No decimals (1,000)' },
+        { value: '2', label: 'Two decimals (1,000.00)' },
+      ]},
     ],
     email: [
       { label: 'SMTP Host', description: 'Email server host', type: 'text', defaultValue: '' },
@@ -194,7 +213,7 @@ export default function SettingsPage() {
                       />
                       <span className="text-sm text-gray-600">{field.description}</span>
                     </label>
-                  ) : field.type === 'select' ? (
+                  ) : field.type === 'select' || field.type === 'currency-select' ? (
                     <select
                       value={value}
                       onChange={(e) =>
@@ -205,9 +224,19 @@ export default function SettingsPage() {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="africastalking">Africa&apos;s Talking</option>
-                      <option value="twilio">Twilio</option>
-                      <option value="nexmo">Vonage (Nexmo)</option>
+                      {field.options ? (
+                        field.options.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="africastalking">Africa&apos;s Talking</option>
+                          <option value="twilio">Twilio</option>
+                          <option value="nexmo">Vonage (Nexmo)</option>
+                        </>
+                      )}
                     </select>
                   ) : (
                     <input

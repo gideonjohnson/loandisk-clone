@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Rajdhani, Inter } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
 const rajdhani = Rajdhani({
   variable: "--font-rajdhani",
@@ -26,7 +27,6 @@ export const metadata: Metadata = {
   description: "Cloud-based loan management system for microfinance institutions, SACCOs, and money lenders. Automate loan origination, tracking, and collections.",
   keywords: "loan management software, microfinance software, SACCO software, money lending software, loan tracking, loan origination",
   manifest: "/manifest.json",
-  themeColor: "#2563eb",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -37,6 +37,10 @@ export const metadata: Metadata = {
     description: "Automate your lending operations with cloud-based loan management for microfinance institutions.",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
@@ -61,6 +65,7 @@ export default function RootLayout({
         >
           <SessionProvider>{children}</SessionProvider>
           <Toaster />
+          <ServiceWorkerRegistration />
         </ThemeProvider>
       </body>
     </html>

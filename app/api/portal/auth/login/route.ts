@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { withRateLimit, RATE_LIMITS } from '@/lib/security/rateLimit'
 
 /**
  * POST /api/portal/auth/login
  * Authenticate borrower for customer portal
  */
-export async function POST(request: Request) {
+async function handler(request: Request) {
   try {
     const body = await request.json()
     const { phone, pin } = body
@@ -104,3 +105,5 @@ export async function POST(request: Request) {
     )
   }
 }
+
+export const POST = withRateLimit(handler, RATE_LIMITS.AUTH)

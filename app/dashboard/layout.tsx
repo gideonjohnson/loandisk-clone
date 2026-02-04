@@ -6,11 +6,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, DollarSign, CreditCard, BarChart3, Settings,
-  LogOut, Wallet, Bell, Menu, X, Building2, Briefcase, FileText,
-  ShieldCheck, AlertTriangle, UserCheck
+  LogOut, Wallet, Menu, X, Building2, Briefcase, FileText, Bell,
+  AlertTriangle, UserCheck, ClipboardList
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 export default function DashboardLayout({
   children,
@@ -36,6 +37,7 @@ export default function DashboardLayout({
     { name: 'Branches', href: '/dashboard/branches', icon: Building2 },
     { name: 'KYC', href: '/dashboard/kyc', icon: UserCheck },
     { name: 'Fraud', href: '/dashboard/fraud', icon: AlertTriangle },
+    { name: 'Audit Log', href: '/dashboard/audit-log', icon: ClipboardList },
     { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
     { name: 'Templates', href: '/dashboard/templates', icon: FileText },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
@@ -65,13 +67,16 @@ export default function DashboardLayout({
           </div>
           <span className="font-display font-semibold text-white">Meek</span>
         </div>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-white/70 hover:text-white focus:outline-none transition-colors"
-          aria-label="Toggle menu"
-        >
-          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 text-white/70 hover:text-white focus:outline-none transition-colors"
+            aria-label="Toggle menu"
+          >
+            {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile sidebar overlay */}

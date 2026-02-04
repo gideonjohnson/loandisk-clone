@@ -1,4 +1,11 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
 
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker deployment
@@ -6,6 +13,9 @@ const nextConfig: NextConfig = {
 
   // Strict mode for better error catching
   reactStrictMode: true,
+
+  // Empty turbopack config to silence warning (Serwist uses webpack)
+  turbopack: {},
 
   // Skip TypeScript errors during build (pre-existing route type issues)
   typescript: {
@@ -65,4 +75,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
