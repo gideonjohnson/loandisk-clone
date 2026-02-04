@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
 import { motion } from 'framer-motion'
@@ -186,10 +187,14 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
-          <img
+          <Image
             src="/hero-bg.jpg"
             alt="Modern business building representing financial growth"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            priority
+            quality={75}
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0a1628]/95 via-[#0a1628]/80 to-[#0a1628]/60"></div>
         </div>
@@ -204,17 +209,17 @@ export default function Home() {
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
               <span className="text-white/90 text-sm">Trusted by 800+ lending companies worldwide</span>
             </motion.div>
-            <motion.h1 variants={fadeInUp} className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            <motion.h1 variants={fadeInUp} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
               Modern Loan Management Software for Microfinance
             </motion.h1>
-            <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-white/80 mb-8">
+            <motion.p variants={fadeInUp} className="text-base sm:text-lg text-white/80 mb-8">
               Automate your lending operations, reduce defaults, and grow your portfolio with our cloud-based loan management system.
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/auth/signin"
-                  className="inline-flex items-center justify-center bg-[#FFD700] text-gray-900 px-8 py-4 rounded-xl font-semibold hover:bg-[#e6c200] text-lg shadow-lg transition-all"
+                  className="inline-flex items-center justify-center bg-[#FFD700] text-gray-900 px-8 py-4 rounded-xl font-semibold hover:bg-[#e6c200] text-base shadow-lg transition-all"
                 >
                   Start Free Trial
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -222,7 +227,7 @@ export default function Home() {
               </motion.div>
               <motion.button
                 whileHover={{ scale: 1.02 }}
-                className="inline-flex items-center justify-center bg-white/10 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/20 text-lg border border-white/30 backdrop-blur-sm transition-all"
+                className="inline-flex items-center justify-center bg-white/10 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/20 text-base border border-white/30 backdrop-blur-sm transition-all"
               >
                 <Play className="w-5 h-5 mr-2" />
                 Watch Demo
@@ -279,7 +284,7 @@ export default function Home() {
               { value: '99.9%', label: 'Uptime' }
             ].map((stat, i) => (
               <motion.div key={i} variants={scaleIn} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-[#4169E1]">{stat.value}</div>
+                <div className="text-2xl md:text-3xl font-bold text-[#4169E1]">{stat.value}</div>
                 <div className="text-gray-500 dark:text-gray-400">{stat.label}</div>
               </motion.div>
             ))}
@@ -297,10 +302,10 @@ export default function Home() {
               viewport={{ once: true }}
               variants={staggerContainer}
             >
-              <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              <motion.h2 variants={fadeInUp} className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">
                 What is Meek Loan Management Software?
               </motion.h2>
-              <motion.p variants={fadeInUp} className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+              <motion.p variants={fadeInUp} className="text-base text-gray-600 dark:text-gray-300 mb-6">
                 Meek is a comprehensive cloud-based loan management system designed specifically for microfinance institutions, SACCOs, money lenders, and credit unions.
               </motion.p>
               <motion.ul variants={staggerContainer} className="space-y-4">
@@ -325,10 +330,14 @@ export default function Home() {
               className="relative"
             >
               <div className="rounded-2xl overflow-hidden shadow-2xl">
-                <img
+                <Image
                   src="/feature-1.jpg"
                   alt="Team working on business plan in modern office"
+                  width={800}
+                  height={600}
                   className="w-full h-auto object-cover"
+                  quality={75}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
               <motion.div
@@ -356,10 +365,10 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Powerful Features for Modern Lending
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-500 dark:text-gray-400 text-base max-w-2xl mx-auto">
               Everything you need to manage loans efficiently, reduce risk, and scale your business
             </p>
           </motion.div>
@@ -369,7 +378,7 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {[
               { icon: DollarSign, title: 'Loan Origination', desc: 'Streamline applications with customizable forms and automated approval workflows.', color: 'blue' },
@@ -383,12 +392,12 @@ export default function Home() {
                 key={i}
                 variants={scaleIn}
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-100 dark:border-gray-800 hover:shadow-xl transition-all duration-300"
+                className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-5 sm:p-8 border border-gray-100 dark:border-gray-800 hover:shadow-xl transition-all duration-300"
               >
                 <div className={`w-14 h-14 bg-${feature.color}-100 dark:bg-${feature.color}-900/30 rounded-xl flex items-center justify-center mb-6`}>
                   <feature.icon className={`w-7 h-7 text-${feature.color}-600 dark:text-${feature.color}-400`} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
                 <p className="text-gray-500 dark:text-gray-400">{feature.desc}</p>
               </motion.div>
             ))}
@@ -407,10 +416,14 @@ export default function Home() {
               className="order-2 lg:order-1"
             >
               <div className="rounded-2xl overflow-hidden shadow-2xl">
-                <img
+                <Image
                   src="/feature-2.jpg"
                   alt="Loan officer meeting with clients"
+                  width={800}
+                  height={600}
                   className="w-full h-auto object-cover"
+                  quality={75}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
             </motion.div>
@@ -421,10 +434,10 @@ export default function Home() {
               variants={staggerContainer}
               className="order-1 lg:order-2"
             >
-              <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              <motion.h2 variants={fadeInUp} className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">
                 Built for Every Type of Lender
               </motion.h2>
-              <motion.p variants={fadeInUp} className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              <motion.p variants={fadeInUp} className="text-base text-gray-600 dark:text-gray-300 mb-8">
                 Whether you&apos;re a small money lender or a large microfinance institution, Meek scales with your business.
               </motion.p>
               <motion.div variants={staggerContainer} className="space-y-6">
@@ -459,10 +472,10 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Loved by Lending Professionals
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-500 dark:text-gray-400 text-base max-w-2xl mx-auto">
               See what our customers have to say about Meek
             </p>
           </motion.div>
@@ -512,10 +525,10 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Why Meek Stands Out
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               See how we compare to traditional loan management solutions
             </p>
           </motion.div>
@@ -562,10 +575,10 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Simple, Transparent Pricing
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-500 dark:text-gray-400 text-base max-w-2xl mx-auto">
               Start free and scale as you grow. No hidden fees.
             </p>
           </motion.div>
@@ -660,10 +673,10 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg">
+            <p className="text-gray-500 dark:text-gray-400 text-base">
               Got questions? We&apos;ve got answers.
             </p>
           </motion.div>
@@ -713,17 +726,17 @@ export default function Home() {
             viewport={{ once: true }}
             variants={staggerContainer}
           >
-            <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            <motion.h2 variants={fadeInUp} className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6">
               Ready to Transform Your Lending Business?
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-lg sm:text-xl text-white/90 mb-10">
+            <motion.p variants={fadeInUp} className="text-base sm:text-lg text-white/90 mb-10">
               Join 800+ lending companies that trust Meek to manage their loan portfolios
             </motion.p>
             <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/auth/signin"
-                  className="inline-flex items-center justify-center bg-white text-[#4169E1] px-10 py-4 rounded-xl font-semibold hover:bg-gray-100 text-lg shadow-lg transition-all"
+                  className="inline-flex items-center justify-center bg-white text-[#4169E1] px-10 py-4 rounded-xl font-semibold hover:bg-gray-100 text-base shadow-lg transition-all"
                 >
                   Start Your Free Trial
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -732,7 +745,7 @@ export default function Home() {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/calculator"
-                  className="inline-flex items-center justify-center bg-transparent text-white px-10 py-4 rounded-xl font-semibold hover:bg-white/10 text-lg border-2 border-white/50 transition-all"
+                  className="inline-flex items-center justify-center bg-transparent text-white px-10 py-4 rounded-xl font-semibold hover:bg-white/10 text-base border-2 border-white/50 transition-all"
                 >
                   Try Loan Calculator
                 </Link>
@@ -745,7 +758,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-900 dark:bg-black py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-10 h-10 bg-[#4169E1] rounded-xl flex items-center justify-center">

@@ -172,7 +172,7 @@ export default function ProfilePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Profile</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Profile</h1>
         <p className="text-gray-600 mt-1">View and manage your account information</p>
       </div>
 
@@ -182,7 +182,7 @@ export default function ProfilePage() {
           <User className="w-5 h-5 text-blue-600" />
           <h2 className="font-semibold text-gray-900">Personal Information</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <p className="text-sm text-gray-500">Full Name</p>
             <p className="font-medium text-gray-900">{profile.readOnly.firstName} {profile.readOnly.lastName}</p>

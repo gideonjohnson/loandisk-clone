@@ -98,12 +98,12 @@ export default function LoansPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Loans</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Loans</h1>
         <p className="text-gray-600 mt-1">View and manage your loans</p>
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -111,7 +111,7 @@ export default function LoansPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Active Loans</p>
-              <p className="text-2xl font-bold text-gray-900">{activeCount}</p>
+              <p className="text-xl font-bold text-gray-900">{activeCount}</p>
             </div>
           </div>
         </div>
@@ -122,11 +122,11 @@ export default function LoansPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Balance</p>
-              <p className="text-2xl font-bold text-red-600">{formatCurrency(totalBalance)}</p>
+              <p className="text-xl font-bold text-red-600">{formatCurrency(totalBalance)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 col-span-2 sm:col-span-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
               <Calendar className="w-6 h-6 text-yellow-600" />
@@ -135,7 +135,7 @@ export default function LoansPage() {
               <p className="text-sm text-gray-500">Next Payment</p>
               {nextPayment ? (
                 <>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(nextPayment.amount)}</p>
+                  <p className="text-xl font-bold text-gray-900">{formatCurrency(nextPayment.amount)}</p>
                   <p className="text-xs text-gray-500">Due {formatDate(nextPayment.dueDate)}</p>
                 </>
               ) : (
@@ -208,7 +208,7 @@ export default function LoansPage() {
                     </p>
                   </div>
                   <div className="text-left sm:text-right space-y-1">
-                    <p className="text-lg font-bold text-gray-900">{formatCurrency(loan.remainingBalance)}</p>
+                    <p className="text-base font-bold text-gray-900">{formatCurrency(loan.remainingBalance)}</p>
                     <p className="text-xs text-gray-500">remaining balance</p>
                     {loan.nextPayment && (
                       <p className="text-xs text-gray-500">

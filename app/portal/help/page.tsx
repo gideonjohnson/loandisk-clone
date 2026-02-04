@@ -116,7 +116,7 @@ export default function HelpPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Help Center</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Help Center</h1>
         <p className="text-gray-600 mt-1">Find answers to frequently asked questions</p>
       </div>
 
@@ -161,7 +161,7 @@ export default function HelpPage() {
       {/* Contact Info Card */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
         <h2 className="font-semibold text-gray-900 mb-4">Contact Us</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Phone className="w-5 h-5 text-blue-600" />
@@ -180,7 +180,7 @@ export default function HelpPage() {
               <p className="text-sm text-gray-600">support@meekfund.ink</p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 col-span-2 sm:col-span-1">
             <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Clock className="w-5 h-5 text-purple-600" />
             </div>

@@ -95,14 +95,14 @@ export default function PortalDashboard() {
     <div>
       {/* Welcome Header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
           Welcome back, {data.borrower.firstName}!
         </h1>
         <p className="text-gray-600 mt-1">Here&apos;s your account summary</p>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -110,7 +110,7 @@ export default function PortalDashboard() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Active Loans</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-gray-900">
                 {data.loans.filter(l => l.status === 'ACTIVE').length}
               </p>
             </div>
@@ -124,14 +124,14 @@ export default function PortalDashboard() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Balance</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-xl font-bold text-red-600">
                 {formatCurrency(data.totalBalance)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 sm:col-span-2 lg:col-span-1">
+        <div className="bg-white rounded-xl shadow-sm p-6 col-span-2 lg:col-span-1">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
               <Calendar className="w-6 h-6 text-yellow-600" />
@@ -140,7 +140,7 @@ export default function PortalDashboard() {
               <p className="text-sm text-gray-500">Next Payment</p>
               {data.nextPayment ? (
                 <>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl font-bold text-gray-900">
                     {formatCurrency(data.nextPayment.amount)}
                   </p>
                   <p className="text-xs text-gray-500">

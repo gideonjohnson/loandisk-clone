@@ -109,7 +109,7 @@ export default function PaymentsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Payments</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Payments</h1>
         <p className="text-gray-600 mt-1">View your payment history and upcoming schedules</p>
       </div>
 
@@ -181,7 +181,7 @@ export default function PaymentsPage() {
                         </p>
                       </div>
                       <div className="text-left sm:text-right space-y-1">
-                        <p className="text-lg font-bold text-gray-900">{formatCurrency(payment.amount)}</p>
+                        <p className="text-base font-bold text-gray-900">{formatCurrency(payment.amount)}</p>
                         <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${
                           payment.isReversed
                             ? 'bg-gray-100 text-gray-700'
