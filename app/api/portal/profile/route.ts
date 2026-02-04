@@ -87,8 +87,8 @@ export async function PUT(request: Request) {
         return NextResponse.json({ error: 'Current PIN is incorrect' }, { status: 400 })
       }
 
-      if (!/^\d{4}$/.test(newPin)) {
-        return NextResponse.json({ error: 'New PIN must be exactly 4 digits' }, { status: 400 })
+      if (!/^\d{6}$/.test(newPin)) {
+        return NextResponse.json({ error: 'New PIN must be exactly 6 digits' }, { status: 400 })
       }
 
       const hashedPin = await bcrypt.hash(newPin, 10)

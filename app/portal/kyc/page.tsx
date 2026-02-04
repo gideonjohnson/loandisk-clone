@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CheckCircle, Clock, XCircle, Upload, Loader2, FileText } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { CheckCircle, Clock, XCircle, Upload, Loader2, FileText, ImageIcon, X } from 'lucide-react'
 
 interface KYCStatus {
   status: string
@@ -14,12 +14,21 @@ export default function PortalKYCPage() {
   const [kyc, setKyc] = useState<KYCStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [uploadingFront, setUploadingFront] = useState(false)
+  const [uploadingBack, setUploadingBack] = useState(false)
+  const [error, setError] = useState('')
+  const frontInputRef = useRef<HTMLInputElement>(null)
+  const backInputRef = useRef<HTMLInputElement>(null)
+
   const [form, setForm] = useState({
     documentType: 'NATIONAL_ID',
     documentNumber: '',
     idFrontUrl: '',
     idBackUrl: '',
   })
+
+  const [frontPreview, setFrontPreview] = useState<string | null>(null)
+  const [backPreview, setBackPreview] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/portal/kyc')
@@ -29,9 +38,87 @@ export default function PortalKYCPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch('/api/portal/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Failed to upload file')
+        return null
+      }
+
+      const data = await res.json()
+      return data.url
+    } catch {
+      setError('Failed to upload file. Please try again.')
+      return null
+    }
+  }
+
+  const handleFrontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setError('')
+    setUploadingFront(true)
+
+    // Show preview
+    const reader = new FileReader()
+    reader.onload = (ev) => setFrontPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+
+    const url = await uploadFile(file)
+    if (url) {
+      setForm(prev => ({ ...prev, idFrontUrl: url }))
+    } else {
+      setFrontPreview(null)
+    }
+    setUploadingFront(false)
+  }
+
+  const handleBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setError('')
+    setUploadingBack(true)
+
+    const reader = new FileReader()
+    reader.onload = (ev) => setBackPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+
+    const url = await uploadFile(file)
+    if (url) {
+      setForm(prev => ({ ...prev, idBackUrl: url }))
+    } else {
+      setBackPreview(null)
+    }
+    setUploadingBack(false)
+  }
+
+  const removeFront = () => {
+    setForm(prev => ({ ...prev, idFrontUrl: '' }))
+    setFrontPreview(null)
+    if (frontInputRef.current) frontInputRef.current.value = ''
+  }
+
+  const removeBack = () => {
+    setForm(prev => ({ ...prev, idBackUrl: '' }))
+    setBackPreview(null)
+    if (backInputRef.current) backInputRef.current.value = ''
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.documentNumber || !form.idFrontUrl) return
+    setError('')
     setSubmitting(true)
     try {
       const res = await fetch('/api/portal/kyc', {
@@ -41,7 +128,12 @@ export default function PortalKYCPage() {
       })
       if (res.ok) {
         setKyc({ status: 'PENDING', documentType: form.documentType, submittedAt: new Date().toISOString() })
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to submit documents')
       }
+    } catch {
+      setError('Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -51,7 +143,6 @@ export default function PortalKYCPage() {
 
   const status = kyc?.status || 'NOT_STARTED'
 
-  // Progress steps
   const steps = [
     { key: 'NOT_STARTED', label: 'Submit', done: status !== 'NOT_STARTED' },
     { key: 'PENDING', label: 'Review', done: ['VERIFIED', 'REJECTED'].includes(status) },
@@ -112,6 +203,12 @@ export default function PortalKYCPage() {
             <h2 className="font-semibold">Submit Documents</h2>
           </div>
 
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium mb-1">Document Type</label>
             <select
@@ -137,32 +234,79 @@ export default function PortalKYCPage() {
             />
           </div>
 
+          {/* Front Image Upload */}
           <div>
-            <label className="block text-sm font-medium mb-1">ID Front Image URL *</label>
-            <input
-              type="url"
-              value={form.idFrontUrl}
-              onChange={e => setForm({ ...form, idFrontUrl: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="https://example.com/id-front.jpg"
-              required
-            />
+            <label className="block text-sm font-medium mb-1">ID Front Image *</label>
+            {frontPreview ? (
+              <div className="relative border rounded-lg overflow-hidden">
+                <img src={frontPreview} alt="ID Front" className="w-full h-48 object-cover" />
+                <button
+                  type="button"
+                  onClick={removeFront}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                {uploadingFront && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">Click to upload front of ID</span>
+                <span className="text-xs text-gray-400 mt-1">JPG or PNG, max 5MB</span>
+                <input
+                  ref={frontInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  onChange={handleFrontUpload}
+                  className="hidden"
+                />
+              </label>
+            )}
           </div>
 
+          {/* Back Image Upload */}
           <div>
-            <label className="block text-sm font-medium mb-1">ID Back Image URL</label>
-            <input
-              type="url"
-              value={form.idBackUrl}
-              onChange={e => setForm({ ...form, idBackUrl: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="https://example.com/id-back.jpg"
-            />
+            <label className="block text-sm font-medium mb-1">ID Back Image</label>
+            {backPreview ? (
+              <div className="relative border rounded-lg overflow-hidden">
+                <img src={backPreview} alt="ID Back" className="w-full h-48 object-cover" />
+                <button
+                  type="button"
+                  onClick={removeBack}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                {uploadingBack && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">Click to upload back of ID</span>
+                <span className="text-xs text-gray-400 mt-1">JPG or PNG, max 5MB (optional)</span>
+                <input
+                  ref={backInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  onChange={handleBackUpload}
+                  className="hidden"
+                />
+              </label>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={submitting || !form.documentNumber || !form.idFrontUrl}
+            disabled={submitting || uploadingFront || uploadingBack || !form.documentNumber || !form.idFrontUrl}
             className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}

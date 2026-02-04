@@ -114,8 +114,8 @@ export default function ProfilePage() {
       return
     }
 
-    if (!/^\d{4}$/.test(newPin)) {
-      setPinMessage({ type: 'error', text: 'PIN must be exactly 4 digits' })
+    if (!/^\d{6}$/.test(newPin)) {
+      setPinMessage({ type: 'error', text: 'PIN must be exactly 6 digits' })
       return
     }
 
@@ -351,10 +351,10 @@ export default function ProfilePage() {
               value={currentPin}
               onChange={(e) => setCurrentPin(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="****"
-              maxLength={4}
+              placeholder="******"
+              maxLength={6}
               inputMode="numeric"
-              pattern="\d{4}"
+              pattern="\d{6}"
             />
           </div>
           <div>
@@ -364,10 +364,10 @@ export default function ProfilePage() {
               value={newPin}
               onChange={(e) => setNewPin(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="****"
-              maxLength={4}
+              placeholder="******"
+              maxLength={6}
               inputMode="numeric"
-              pattern="\d{4}"
+              pattern="\d{6}"
             />
           </div>
           <div>
@@ -377,10 +377,10 @@ export default function ProfilePage() {
               value={confirmPin}
               onChange={(e) => setConfirmPin(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="****"
-              maxLength={4}
+              placeholder="******"
+              maxLength={6}
               inputMode="numeric"
-              pattern="\d{4}"
+              pattern="\d{6}"
             />
           </div>
         </div>

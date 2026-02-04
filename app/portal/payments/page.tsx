@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Wallet, Clock, Filter, Receipt, AlertTriangle } from 'lucide-react'
+import Link from 'next/link'
+import { Wallet, Clock, Filter, Receipt, AlertTriangle, Plus } from 'lucide-react'
 
 interface PaymentData {
   id: string
@@ -36,6 +37,7 @@ interface LoanOption {
 }
 
 type Tab = 'history' | 'upcoming'
+const PAGE_SIZE = 10
 
 export default function PaymentsPage() {
   const router = useRouter()
@@ -43,8 +45,11 @@ export default function PaymentsPage() {
   const [upcoming, setUpcoming] = useState<UpcomingData[]>([])
   const [loans, setLoans] = useState<LoanOption[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [tab, setTab] = useState<Tab>('history')
   const [filterLoan, setFilterLoan] = useState('')
+  const [historyPage, setHistoryPage] = useState(1)
+  const [upcomingPage, setUpcomingPage] = useState(1)
 
   useEffect(() => {
     fetchPayments()
@@ -61,8 +66,9 @@ export default function PaymentsPage() {
       setPayments(result.payments || [])
       setUpcoming(result.upcoming || [])
       setLoans(result.loans || [])
-    } catch (error) {
-      console.error('Failed to fetch payments:', error)
+    } catch (err) {
+      console.error('Failed to fetch payments:', err)
+      setError('Failed to load payments. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -83,13 +89,18 @@ export default function PaymentsPage() {
     })
   }
 
-  const filteredPayments = filterLoan
+  const allFilteredPayments = filterLoan
     ? payments.filter(p => p.loanId === filterLoan)
     : payments
 
-  const filteredUpcoming = filterLoan
+  const allFilteredUpcoming = filterLoan
     ? upcoming.filter(u => u.loanId === filterLoan)
     : upcoming
+
+  const historyTotalPages = Math.ceil(allFilteredPayments.length / PAGE_SIZE)
+  const upcomingTotalPages = Math.ceil(allFilteredUpcoming.length / PAGE_SIZE)
+  const filteredPayments = allFilteredPayments.slice((historyPage - 1) * PAGE_SIZE, historyPage * PAGE_SIZE)
+  const filteredUpcoming = allFilteredUpcoming.slice((upcomingPage - 1) * PAGE_SIZE, upcomingPage * PAGE_SIZE)
 
   const statusColors: Record<string, string> = {
     COMPLETED: 'bg-green-100 text-green-700',
@@ -108,9 +119,24 @@ export default function PaymentsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Payments</h1>
-        <p className="text-gray-600 mt-1">View your payment history and upcoming schedules</p>
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Payments</h1>
+          <p className="text-gray-600 mt-1">View your payment history and upcoming schedules</p>
+        </div>
+        <Link
+          href="/portal/payments/make"
+          className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Make Payment
+        </Link>
       </div>
 
       {/* Tab Switcher */}
@@ -142,7 +168,7 @@ export default function PaymentsPage() {
             <Filter className="w-4 h-4 text-gray-400" />
             <select
               value={filterLoan}
-              onChange={(e) => setFilterLoan(e.target.value)}
+              onChange={(e) => { setFilterLoan(e.target.value); setHistoryPage(1); setUpcomingPage(1) }}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
             >
               <option value="">All Loans</option>
@@ -196,6 +222,29 @@ export default function PaymentsPage() {
               </div>
             </div>
           )}
+          {historyTotalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-sm text-gray-500">
+                Showing {(historyPage - 1) * PAGE_SIZE + 1}-{Math.min(historyPage * PAGE_SIZE, allFilteredPayments.length)} of {allFilteredPayments.length}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                  disabled={historyPage === 1}
+                  className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setHistoryPage(p => Math.min(historyTotalPages, p + 1))}
+                  disabled={historyPage === historyTotalPages}
+                  className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -239,6 +288,29 @@ export default function PaymentsPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {upcomingTotalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <p className="text-sm text-gray-500">
+                Showing {(upcomingPage - 1) * PAGE_SIZE + 1}-{Math.min(upcomingPage * PAGE_SIZE, allFilteredUpcoming.length)} of {allFilteredUpcoming.length}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setUpcomingPage(p => Math.max(1, p - 1))}
+                  disabled={upcomingPage === 1}
+                  className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setUpcomingPage(p => Math.min(upcomingTotalPages, p + 1))}
+                  disabled={upcomingPage === upcomingTotalPages}
+                  className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </>

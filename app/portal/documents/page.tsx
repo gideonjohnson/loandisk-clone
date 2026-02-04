@@ -30,13 +30,17 @@ const TYPE_LABELS: Record<string, string> = {
   OTHER: 'Other',
 }
 
+const PAGE_SIZE = 12
+
 export default function DocumentsPage() {
   const router = useRouter()
   const [documents, setDocuments] = useState<DocumentData[]>([])
   const [loans, setLoans] = useState<LoanOption[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [filterLoan, setFilterLoan] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     fetchDocuments()
@@ -52,8 +56,9 @@ export default function DocumentsPage() {
       const result = await res.json()
       setDocuments(result.documents || [])
       setLoans(result.loans || [])
-    } catch (error) {
-      console.error('Failed to fetch documents:', error)
+    } catch (err) {
+      console.error('Failed to fetch documents:', err)
+      setError('Failed to load documents. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -67,11 +72,14 @@ export default function DocumentsPage() {
     })
   }
 
-  const filteredDocuments = documents.filter(doc => {
+  const allFilteredDocuments = documents.filter(doc => {
     if (filterLoan && doc.loanId !== filterLoan) return false
     if (filterType && doc.type !== filterType) return false
     return true
   })
+
+  const totalPages = Math.ceil(allFilteredDocuments.length / PAGE_SIZE)
+  const filteredDocuments = allFilteredDocuments.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const documentTypes = [...new Set(documents.map(d => d.type))]
 
@@ -90,6 +98,12 @@ export default function DocumentsPage() {
         <p className="text-gray-600 mt-1">View and download your loan documents</p>
       </div>
 
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+          {error}
+        </div>
+      )}
+
       {/* Filters */}
       {documents.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -97,7 +111,7 @@ export default function DocumentsPage() {
             <Filter className="w-4 h-4 text-gray-400 flex-shrink-0 mt-2 sm:mt-0" />
             <select
               value={filterLoan}
-              onChange={(e) => setFilterLoan(e.target.value)}
+              onChange={(e) => { setFilterLoan(e.target.value); setPage(1) }}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white w-full sm:w-auto"
             >
               <option value="">All Loans</option>
@@ -107,7 +121,7 @@ export default function DocumentsPage() {
             </select>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={(e) => { setFilterType(e.target.value); setPage(1) }}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white w-full sm:w-auto"
             >
               <option value="">All Types</option>
@@ -130,38 +144,63 @@ export default function DocumentsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDocuments.map((doc) => (
-            <div key={doc.id} className="bg-white rounded-xl shadow-sm p-3 sm:p-5">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-blue-600" />
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredDocuments.map((doc) => (
+              <div key={doc.id} className="bg-white rounded-xl shadow-sm p-3 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 truncate" title={doc.fileName}>
+                      {doc.fileName}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {TYPE_LABELS[doc.type] || doc.type}
+                    </p>
+                    {doc.loanNumber && (
+                      <p className="text-xs text-gray-400 mt-0.5">{doc.loanNumber}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(doc.createdAt)}</p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-gray-900 truncate" title={doc.fileName}>
-                    {doc.fileName}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    {TYPE_LABELS[doc.type] || doc.type}
-                  </p>
-                  {doc.loanNumber && (
-                    <p className="text-xs text-gray-400 mt-0.5">{doc.loanNumber}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1">{formatDate(doc.createdAt)}</p>
-                </div>
+                <a
+                  href={doc.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 flex items-center justify-center gap-2 w-full px-3 py-2 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </a>
               </div>
-              <a
-                href={doc.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 flex items-center justify-center gap-2 w-full px-3 py-2 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Download
-              </a>
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <p className="text-sm text-gray-500">
+                Showing {(page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, allFilteredDocuments.length)} of {allFilteredDocuments.length}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   )
