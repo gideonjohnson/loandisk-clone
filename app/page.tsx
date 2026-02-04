@@ -60,7 +60,7 @@ const faqs = [
   },
   {
     question: "Is there a limit on the number of borrowers?",
-    answer: "Our Starter plan supports up to 50 borrowers. Professional and Enterprise plans offer unlimited borrowers, making Meek perfect for growing institutions."
+    answer: "All plans include unlimited borrowers and unlimited branches. The main difference between plans is the number of staff users, active loans, and savings accounts you can manage."
   }
 ]
 
@@ -240,7 +240,7 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400" />
-                14-day free trial
+                45-day free trial
               </div>
             </motion.div>
           </motion.div>
@@ -573,14 +573,24 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8"
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Simple, Transparent Pricing
             </h2>
             <p className="text-gray-500 dark:text-gray-400 text-base max-w-2xl mx-auto">
-              Start free and scale as you grow. No hidden fees.
+              All plans include unlimited branches and unlimited borrowers. No contract, cancel anytime.
             </p>
+          </motion.div>
+
+          {/* Free Trial Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-center py-3 px-6 rounded-xl mb-10 max-w-2xl mx-auto"
+          >
+            <span className="font-semibold">45 Day FREE Trial</span> with all plans — No credit card required
           </motion.div>
 
           <motion.div
@@ -588,77 +598,192 @@ export default function Home() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
           >
-            {/* Starter */}
-            <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Starter</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">For small lenders</p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900 dark:text-white">Free</span>
+            {/* Startup */}
+            <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Startup</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">For new lenders</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-gray-900 dark:text-white">$59</span>
+                <span className="text-gray-500 dark:text-gray-400">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8">
-                {['Up to 50 borrowers', 'Basic reporting', 'Email support'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    {item}
-                  </li>
-                ))}
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  1 user
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  2,000 loans
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  1,000 savings accounts
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Unlimited borrowers
+                </li>
               </ul>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link href="/auth/signin" className="block w-full text-center py-3 border-2 border-[#4169E1] text-[#4169E1] rounded-xl font-semibold hover:bg-[#4169E1] hover:text-white transition-all">
-                  Get Started
+                <Link href="/auth/signin" className="block w-full text-center py-2.5 border-2 border-[#4169E1] text-[#4169E1] rounded-xl font-semibold hover:bg-[#4169E1] hover:text-white transition-all text-sm">
+                  Start Free Trial
                 </Link>
               </motion.div>
             </motion.div>
 
-            {/* Professional */}
-            <motion.div variants={scaleIn} className="bg-[#4169E1] rounded-2xl p-8 relative shadow-xl shadow-blue-500/25">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FFD700] text-gray-900 px-4 py-1 rounded-full text-sm font-semibold">
-                Most Popular
+            {/* Business */}
+            <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Business</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">For small teams</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-gray-900 dark:text-white">$129</span>
+                <span className="text-gray-500 dark:text-gray-400">/mo</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Professional</h3>
-              <p className="text-white/70 mb-4">For growing institutions</p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-white">$49</span>
-                <span className="text-white/70">/month</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {['Unlimited borrowers', 'Advanced analytics', 'SMS notifications', 'Priority support'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-white">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    {item}
-                  </li>
-                ))}
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  3 users
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  4,000 loans
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  3,000 savings accounts
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Unlimited borrowers
+                </li>
               </ul>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link href="/auth/signin" className="block w-full text-center py-3 bg-white text-[#4169E1] rounded-xl font-semibold hover:bg-gray-100 transition-all">
+                <Link href="/auth/signin" className="block w-full text-center py-2.5 border-2 border-[#4169E1] text-[#4169E1] rounded-xl font-semibold hover:bg-[#4169E1] hover:text-white transition-all text-sm">
+                  Start Free Trial
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {/* Growth - Most Popular */}
+            <motion.div variants={scaleIn} className="bg-[#4169E1] rounded-2xl p-6 relative shadow-xl shadow-blue-500/25">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FFD700] text-gray-900 px-3 py-1 rounded-full text-xs font-semibold">
+                Most Popular
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">Growth</h3>
+              <p className="text-white/70 text-sm mb-4">For growing teams</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-white">$179</span>
+                <span className="text-white/70">/mo</span>
+              </div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-white">
+                  <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                  5 users
+                </li>
+                <li className="flex items-center gap-2 text-white">
+                  <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                  6,000 loans
+                </li>
+                <li className="flex items-center gap-2 text-white">
+                  <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                  5,000 savings accounts
+                </li>
+                <li className="flex items-center gap-2 text-white">
+                  <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                  Unlimited borrowers
+                </li>
+              </ul>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link href="/auth/signin" className="block w-full text-center py-2.5 bg-white text-[#4169E1] rounded-xl font-semibold hover:bg-gray-100 transition-all text-sm">
                   Start Free Trial
                 </Link>
               </motion.div>
             </motion.div>
 
             {/* Enterprise */}
-            <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Enterprise</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">For large organizations</p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900 dark:text-white">Custom</span>
+            <motion.div variants={scaleIn} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Enterprise</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">For large teams</p>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-gray-900 dark:text-white">$346</span>
+                <span className="text-gray-500 dark:text-gray-400">/mo</span>
               </div>
-              <ul className="space-y-3 mb-8">
-                {['Multi-branch support', 'Custom integrations', 'Dedicated account manager', 'On-premise option'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    {item}
-                  </li>
-                ))}
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Unlimited users
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Unlimited loans
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Unlimited savings
+                </li>
+                <li className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Unlimited borrowers
+                </li>
               </ul>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link href="/auth/signin" className="block w-full text-center py-3 border-2 border-[#4169E1] text-[#4169E1] rounded-xl font-semibold hover:bg-[#4169E1] hover:text-white transition-all">
+                <Link href="/auth/signin" className="block w-full text-center py-2.5 border-2 border-[#4169E1] text-[#4169E1] rounded-xl font-semibold hover:bg-[#4169E1] hover:text-white transition-all text-sm">
+                  Start Free Trial
+                </Link>
+              </motion.div>
+            </motion.div>
+
+            {/* Custom */}
+            <motion.div variants={scaleIn} className="bg-gray-900 dark:bg-gray-800 rounded-2xl p-6 border border-gray-700">
+              <h3 className="text-lg font-bold text-white mb-1">Custom</h3>
+              <p className="text-gray-400 text-sm mb-4">10,000+ active loans</p>
+              <div className="mb-4">
+                <span className="text-2xl font-bold text-white">Contact Us</span>
+              </div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Private cloud
+                </li>
+                <li className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Custom integrations
+                </li>
+                <li className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Custom workflows
+                </li>
+                <li className="flex items-center gap-2 text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  Dedicated support
+                </li>
+              </ul>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link href="/auth/signin" className="block w-full text-center py-2.5 bg-white text-gray-900 rounded-xl font-semibold hover:bg-gray-100 transition-all text-sm">
                   Contact Sales
                 </Link>
               </motion.div>
             </motion.div>
+          </motion.div>
+
+          {/* Features included in all plans */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center"
+          >
+            <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">All plans include:</p>
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+              {['Repayment Management', 'Staff Roles', 'Borrower Portal', 'Bulk SMS & Email', 'Accounting System', 'Reporting', '24/7 Support'].map((feature, i) => (
+                <span key={i} className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full">
+                  <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                  {feature}
+                </span>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>
