@@ -391,14 +391,21 @@ export async function POST(request: Request) {
 
     // -- Remove demo/seed accounts --
     const demoEmails = ['admin@meek.com', 'officer@meek.com']
-    const dependentTables = ['LoginHistory', 'UserDevice', 'UserSession', 'SecurityAlert', 'Notification', 'ActivityLog', 'BatchJob']
+    const userIdTables = ['LoginHistory', 'UserDevice', 'UserSession', 'SecurityAlert', 'Notification', 'ActivityLog']
     for (const demoEmail of demoEmails) {
       try {
         // Delete dependent records first
-        for (const table of dependentTables) {
+        for (const table of userIdTables) {
           await prisma.$executeRawUnsafe(
             `DELETE FROM "${table}" WHERE "userId" IN (SELECT "id" FROM "User" WHERE "email" = '${demoEmail}')`
           )
+        }
+        await prisma.$executeRawUnsafe(
+          `DELETE FROM "BatchJob" WHERE "createdBy" IN (SELECT "id" FROM "User" WHERE "email" = '${demoEmail}')`
+        )
+        await prisma.$executeRawUnsafe(
+          `DELETE FROM "KYCVerification" WHERE "reviewedBy" IN (SELECT "id" FROM "User" WHERE "email" = '${demoEmail}')`
+        )
         }
         const deleted = await prisma.$executeRawUnsafe(
           `DELETE FROM "User" WHERE "email" = '${demoEmail}'`
