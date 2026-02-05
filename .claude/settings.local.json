@@ -28,7 +28,16 @@
       "Bash(git push:*)",
       "Bash(vercel:*)",
       "WebFetch(domain:loandisk.com)",
-      "WebFetch(domain:www.loandisk.com)"
+      "WebFetch(domain:www.loandisk.com)",
+      "Bash(set DATABASE_URL=postgresql://neondb_owner:npg_8BuGwgzX2iEn@ep-curly-resonance-ahet094s-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require)",
+      "Bash(gh api:*)",
+      "Bash(python -c:*)",
+      "WebFetch(domain:x.loandisk.com)",
+      "Bash(printf:*)",
+      "Bash(yes:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(npm ls:*)"
     ]
   }
 }

@@ -24,7 +24,13 @@ export default function BorrowersPage() {
     fetch('/api/borrowers')
       .then(res => res.json())
       .then(data => {
-        setBorrowers(data)
+        // Handle API errors gracefully
+        if (Array.isArray(data)) {
+          setBorrowers(data)
+        } else {
+          console.error('API error:', data)
+          setBorrowers([])
+        }
         setLoading(false)
       })
       .catch(err => {

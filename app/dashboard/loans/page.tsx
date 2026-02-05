@@ -31,7 +31,13 @@ export default function LoansPage() {
     fetch('/api/loans')
       .then(res => res.json())
       .then(data => {
-        setLoans(data)
+        // Handle API errors gracefully
+        if (Array.isArray(data)) {
+          setLoans(data)
+        } else {
+          console.error('API error:', data)
+          setLoans([])
+        }
         setLoading(false)
       })
       .catch(err => {

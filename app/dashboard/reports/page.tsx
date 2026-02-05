@@ -82,10 +82,11 @@ export default function ReportsPage() {
       fetch('/api/reports/aging').then(res => res.json()),
     ])
       .then(([statsData, cashFlow, portfolio, aging]) => {
-        setStats(statsData)
-        setCashFlowData(cashFlow)
-        setPortfolioData(portfolio)
-        setAgingData(aging)
+        // Handle API errors gracefully
+        if (!statsData?.error) setStats(statsData)
+        if (!cashFlow?.error) setCashFlowData(cashFlow)
+        if (!portfolio?.error) setPortfolioData(portfolio)
+        if (!aging?.error) setAgingData(aging)
         setLoading(false)
       })
       .catch(err => {

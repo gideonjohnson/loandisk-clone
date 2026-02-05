@@ -56,7 +56,8 @@ export default function Dashboard() {
       fetch('/api/dashboard/upcoming-payments').then(res => res.json()),
     ])
       .then(([statsData, loansData, paymentsData]) => {
-        setStats(statsData)
+        // Handle API errors gracefully
+        if (statsData && !statsData.error) setStats(statsData)
         setRecentLoans(Array.isArray(loansData) ? loansData : [])
         setUpcomingPayments(Array.isArray(paymentsData) ? paymentsData : [])
         setLoading(false)

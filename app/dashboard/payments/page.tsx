@@ -30,7 +30,13 @@ export default function PaymentsPage() {
     fetch('/api/payments')
       .then(res => res.json())
       .then(data => {
-        setPayments(data)
+        // Handle API errors gracefully
+        if (Array.isArray(data)) {
+          setPayments(data)
+        } else {
+          console.error('API error:', data)
+          setPayments([])
+        }
         setLoading(false)
       })
       .catch(err => {

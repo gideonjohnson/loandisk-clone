@@ -96,10 +96,24 @@ export function createAuthHandler(
   const middleware = withAuth(requiredPermissions, requireAll)
 
   return async (request: Request, nextJsContext?: NextJsRouteContext) => {
-    // Await the params Promise from Next.js 15+ and convert to plain object
-    const params = nextJsContext?.params ? await nextJsContext.params : {}
-    const context: RouteContext = { params }
-    return middleware(request, context, handler)
+    try {
+      // Await the params Promise from Next.js 15+ and convert to plain object
+      let params: Record<string, string> = {}
+      if (nextJsContext?.params) {
+        // Handle both Promise and plain object for backward compatibility
+        params = typeof nextJsContext.params.then === 'function'
+          ? await nextJsContext.params
+          : (nextJsContext.params as unknown as Record<string, string>)
+      }
+      const context: RouteContext = { params }
+      return middleware(request, context, handler)
+    } catch (error) {
+      console.error('createAuthHandler error:', error)
+      return NextResponse.json(
+        { error: 'Internal Server Error', message: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      )
+    }
   }
 }
 
