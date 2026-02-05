@@ -7,6 +7,10 @@ interface RouteContext {
   params: Record<string, string>
 }
 
+interface NextJsRouteContext {
+  params: Promise<Record<string, string>>
+}
+
 /**
  * Middleware to protect API routes with authentication and permission checks
  * @param requiredPermissions Array of permissions required to access the route
@@ -91,7 +95,10 @@ export function createAuthHandler(
 ) {
   const middleware = withAuth(requiredPermissions, requireAll)
 
-  return async (request: Request, context: RouteContext = { params: {} }) => {
+  return async (request: Request, nextJsContext?: NextJsRouteContext) => {
+    // Await the params Promise from Next.js 15+ and convert to plain object
+    const params = nextJsContext?.params ? await nextJsContext.params : {}
+    const context: RouteContext = { params }
     return middleware(request, context, handler)
   }
 }

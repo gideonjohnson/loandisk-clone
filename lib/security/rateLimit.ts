@@ -106,11 +106,11 @@ export function checkRateLimit(
 /**
  * Rate limit middleware wrapper for API routes
  */
-export function withRateLimit<T>(
-  handler: (request: Request, ...args: unknown[]) => Promise<T>,
+export function withRateLimit<T, C = unknown>(
+  handler: (request: Request, context?: C) => Promise<T>,
   config: RateLimitConfig = RATE_LIMITS.API
 ) {
-  return async (request: Request, ...args: unknown[]): Promise<T | Response> => {
+  return async (request: Request, context?: C): Promise<T | Response> => {
     const { allowed, remaining, resetTime } = checkRateLimit(request, config)
 
     if (!allowed) {
@@ -133,7 +133,7 @@ export function withRateLimit<T>(
       )
     }
 
-    const response = await handler(request, ...args)
+    const response = await handler(request, context)
 
     // Add rate limit headers to successful responses
     if (response instanceof Response) {
