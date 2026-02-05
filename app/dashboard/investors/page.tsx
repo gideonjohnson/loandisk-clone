@@ -148,7 +148,7 @@ export default function InvestorsPage() {
       </div>
 
       {/* Investors Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-hidden overflow-x-auto">
         {loading ? (
           <div className="p-8 text-center">Loading investors...</div>
         ) : investors.length === 0 ? (
@@ -163,7 +163,7 @@ export default function InvestorsPage() {
             </Link>
           </div>
         ) : (
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Investor</th>

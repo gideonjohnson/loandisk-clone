@@ -197,8 +197,8 @@ export default function RemindersPage() {
       </div>
 
       {/* Upcoming Payments Section */}
-      <div className="bg-white rounded-lg shadow mb-8">
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow mb-8 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <Calendar className="w-5 h-5" />
             Upcoming Payments (Next 7 Days)
@@ -206,19 +206,20 @@ export default function RemindersPage() {
           <button
             onClick={sendUpcomingReminders}
             disabled={sending === 'upcoming' || upcomingPayments.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
           >
             <Send className="w-4 h-4" />
             {sending === 'upcoming' ? 'Sending...' : 'Send Reminders'}
           </button>
         </div>
 
+        <div className="overflow-x-auto">
         {loading ? (
           <div className="p-8 text-center text-gray-500">Loading...</div>
         ) : upcomingPayments.length === 0 ? (
           <div className="p-8 text-center text-gray-500">No upcoming payments in the next 7 days</div>
         ) : (
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loan #</th>
@@ -252,11 +253,12 @@ export default function RemindersPage() {
             </tbody>
           </table>
         )}
+        </div>
       </div>
 
       {/* Overdue Payments Section */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-500" />
             Overdue Payments
@@ -264,19 +266,20 @@ export default function RemindersPage() {
           <button
             onClick={sendOverdueNotices}
             disabled={sending === 'overdue' || overduePayments.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm"
           >
             <Send className="w-4 h-4" />
             {sending === 'overdue' ? 'Sending...' : 'Send Notices'}
           </button>
         </div>
 
+        <div className="overflow-x-auto">
         {loading ? (
           <div className="p-8 text-center text-gray-500">Loading...</div>
         ) : overduePayments.length === 0 ? (
           <div className="p-8 text-center text-gray-500">No overdue payments</div>
         ) : (
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loan #</th>
@@ -316,6 +319,7 @@ export default function RemindersPage() {
             </tbody>
           </table>
         )}
+        </div>
       </div>
 
       {/* Cron Job Info */}

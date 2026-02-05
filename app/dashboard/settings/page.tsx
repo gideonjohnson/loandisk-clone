@@ -137,10 +137,10 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="w-64 bg-white rounded-lg shadow p-4">
-          <nav className="space-y-1">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar - horizontal scroll on mobile */}
+        <div className="lg:w-64 bg-white rounded-lg shadow p-4 overflow-x-auto">
+          <nav className="flex lg:flex-col gap-2 lg:space-y-1 min-w-max lg:min-w-0">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const hasHref = 'href' in tab && tab.href
@@ -154,15 +154,15 @@ export default function SettingsPage() {
                       setActiveTab(tab.id)
                     }
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-2 text-left rounded-lg ${
+                  className={`flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 text-left rounded-lg whitespace-nowrap ${
                     activeTab === tab.id && !hasHref
                       ? 'bg-blue-50 text-blue-700'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="flex-1">{tab.label}</span>
-                  {hasHref && <ChevronRight className="w-4 h-4 text-gray-400" />}
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="flex-1 text-sm lg:text-base">{tab.label}</span>
+                  {hasHref && <ChevronRight className="w-4 h-4 text-gray-400 hidden lg:block" />}
                 </button>
               )
             })}
@@ -170,7 +170,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 bg-white rounded-lg shadow p-6">
+        <div className="flex-1 bg-white rounded-lg shadow p-4 sm:p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             {tabs.find((t) => t.id === activeTab)?.label} Settings
           </h2>
