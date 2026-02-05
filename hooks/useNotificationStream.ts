@@ -8,7 +8,15 @@ export function useNotificationStream() {
   const { data: session, status } = useSession()
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const { addNotification, setConnected, setNotifications, setUnreadCount } = useNotificationStore()
+
+  // Get all store values and actions at the top level (proper hooks pattern)
+  const notifications = useNotificationStore((state) => state.notifications)
+  const unreadCount = useNotificationStore((state) => state.unreadCount)
+  const isConnected = useNotificationStore((state) => state.isConnected)
+  const addNotification = useNotificationStore((state) => state.addNotification)
+  const setConnected = useNotificationStore((state) => state.setConnected)
+  const setNotifications = useNotificationStore((state) => state.setNotifications)
+  const setUnreadCount = useNotificationStore((state) => state.setUnreadCount)
 
   const connect = useCallback(() => {
     if (eventSourceRef.current) {
@@ -88,9 +96,9 @@ export function useNotificationStream() {
   }, [status, session?.user, connect, fetchNotifications])
 
   return {
-    isConnected: useNotificationStore((state) => state.isConnected),
-    notifications: useNotificationStore((state) => state.notifications),
-    unreadCount: useNotificationStore((state) => state.unreadCount),
+    isConnected,
+    notifications,
+    unreadCount,
     refetch: fetchNotifications,
   }
 }

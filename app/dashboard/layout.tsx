@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Component, ReactNode } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -12,6 +12,31 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+
+// Error boundary to prevent NotificationBell from crashing the layout
+class NotificationErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch(error: Error) {
+    console.error('NotificationBell error:', error)
+  }
+  render() {
+    if (this.state.hasError) {
+      // Fallback: just show a plain bell icon
+      return (
+        <button className="relative p-2 text-white/70 rounded-lg" disabled>
+          <Bell className="h-5 w-5" />
+        </button>
+      )
+    }
+    return this.props.children
+  }
+}
 
 export default function DashboardLayout({
   children,
@@ -76,7 +101,9 @@ export default function DashboardLayout({
           <span className="font-display font-semibold text-white">Meek</span>
         </div>
         <div className="flex items-center gap-2">
-          <NotificationBell />
+          <NotificationErrorBoundary>
+            <NotificationBell />
+          </NotificationErrorBoundary>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 text-white/70 hover:text-white focus:outline-none transition-colors"
