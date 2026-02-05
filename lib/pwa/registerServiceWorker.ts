@@ -5,8 +5,18 @@
 export async function registerServiceWorker() {
   if (typeof window === 'undefined') return
 
+  // Skip service worker in development or if not supported
+  if (process.env.NODE_ENV === 'development') return
+
   if ('serviceWorker' in navigator) {
     try {
+      // Check if sw.js exists before trying to register
+      const swResponse = await fetch('/sw.js', { method: 'HEAD' })
+      if (!swResponse.ok) {
+        // Service worker file not available, skip silently
+        return
+      }
+
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none',
@@ -26,10 +36,9 @@ export async function registerServiceWorker() {
         }
       })
 
-      console.log('Service Worker registered successfully')
       return registration
-    } catch (error) {
-      console.error('Service Worker registration failed:', error)
+    } catch {
+      // Service worker registration failed silently
     }
   }
 }

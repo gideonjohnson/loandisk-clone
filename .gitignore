@@ -52,3 +52,4 @@ nul
 
 .vercel
 .env*.local
+twilio_2FA_recovery_code.txt
