@@ -136,6 +136,12 @@ export default function PortalLayout({
           <p className="text-center text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Meek Microfinance. All rights reserved.
           </p>
+          <p className="text-center text-xs text-muted-foreground/60 mt-1">
+            IT solutions by{' '}
+            <a href="https://dafdev.com" target="_blank" rel="noopener noreferrer" className="hover:text-muted-foreground transition-colors underline-offset-2 hover:underline">
+              DAF Developers
+            </a>
+          </p>
         </div>
       </footer>
 

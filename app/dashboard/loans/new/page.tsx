@@ -13,6 +13,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormField } from '@/components/forms/form-field'
 import { FormSelect } from '@/components/forms/form-select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { FormCurrencyInput } from '@/components/forms/form-currency-input'
 import { FormDatePicker } from '@/components/forms/form-date-picker'
 import { FormTextarea } from '@/components/forms/form-textarea'
@@ -25,12 +32,25 @@ interface Borrower {
   lastName: string
 }
 
+type TermUnit = 'days' | 'weeks' | 'months' | 'years'
+
+function toMonths(value: number, unit: TermUnit): number {
+  switch (unit) {
+    case 'days':  return Math.max(1, Math.ceil(value / 30))
+    case 'weeks': return Math.max(1, Math.ceil(value / 4))
+    case 'years': return value * 12
+    default:      return value
+  }
+}
+
 export default function NewLoanPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [borrowers, setBorrowers] = useState<Borrower[]>([])
   const [loadingBorrowers, setLoadingBorrowers] = useState(true)
+  const [termValue, setTermValue] = useState('12')
+  const [termUnit, setTermUnit] = useState<TermUnit>('months')
 
   const form = useForm<CreateLoanInput>({
     resolver: zodResolver(createLoanSchema),
@@ -68,35 +88,36 @@ export default function NewLoanPage() {
   const watchRate = form.watch('interestRate')
   const watchTerm = form.watch('termMonths')
 
-  // Calculate monthly payment
   const loanCalculation = useMemo(() => {
-    if (!watchPrincipal || !watchRate || !watchTerm) {
-      return null
-    }
-
     const principal = Number(watchPrincipal)
-    const rate = Number(watchRate) / 100 / 12
-    const term = Number(watchTerm)
+    const rate = Number(watchRate)
+    const term = Number(watchTerm || termValue)
+    if (!principal || principal <= 0 || !term || term <= 0) return null
 
-    if (rate === 0) {
-      const monthlyPayment = principal / term
-      return {
-        monthlyPayment,
-        totalRepayment: monthlyPayment * term,
-        totalInterest: 0,
+    const annualRate = rate / 100
+
+    switch (termUnit) {
+      case 'days': {
+        const interest = principal * annualRate * (term / 365)
+        return { periodicPayment: principal + interest, totalRepayment: principal + interest, totalInterest: interest, periodLabel: 'Total due' }
+      }
+      case 'weeks': {
+        const weeklyRate = annualRate / 52
+        const payment = weeklyRate === 0 ? principal / term : principal * (weeklyRate * Math.pow(1 + weeklyRate, term)) / (Math.pow(1 + weeklyRate, term) - 1)
+        return { periodicPayment: payment, totalRepayment: payment * term, totalInterest: payment * term - principal, periodLabel: 'Weekly payment' }
+      }
+      case 'years': {
+        const yearlyRate = annualRate
+        const payment = yearlyRate === 0 ? principal / term : principal * (yearlyRate * Math.pow(1 + yearlyRate, term)) / (Math.pow(1 + yearlyRate, term) - 1)
+        return { periodicPayment: payment, totalRepayment: payment * term, totalInterest: payment * term - principal, periodLabel: 'Annual payment' }
+      }
+      default: {
+        const monthlyRate = annualRate / 12
+        const payment = monthlyRate === 0 ? principal / term : principal * (monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1)
+        return { periodicPayment: payment, totalRepayment: payment * term, totalInterest: payment * term - principal, periodLabel: 'Monthly payment' }
       }
     }
-
-    const monthlyPayment = principal * (rate * Math.pow(1 + rate, term)) / (Math.pow(1 + rate, term) - 1)
-    const totalRepayment = monthlyPayment * term
-    const totalInterest = totalRepayment - principal
-
-    return {
-      monthlyPayment,
-      totalRepayment,
-      totalInterest,
-    }
-  }, [watchPrincipal, watchRate, watchTerm])
+  }, [watchPrincipal, watchRate, watchTerm, termUnit, termValue])
 
   const onSubmit = async (data: CreateLoanInput) => {
     setIsSubmitting(true)
@@ -107,7 +128,7 @@ export default function NewLoanPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, termUnit }),
       })
 
       if (!response.ok) {
@@ -188,13 +209,45 @@ export default function NewLoanPage() {
                         description="Annual interest rate"
                       />
 
-                      <FormField
-                        name="termMonths"
-                        label="Term (Months)"
-                        type="number"
-                        placeholder="12"
-                        description="1-360 months"
-                      />
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium leading-none">Loan Term</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            value={termValue}
+                            onChange={(e) => {
+                              setTermValue(e.target.value)
+                              const months = toMonths(Number(e.target.value), termUnit)
+                              form.setValue('termMonths', months, { shouldValidate: true })
+                            }}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          />
+                          <Select
+                            value={termUnit}
+                            onValueChange={(unit: TermUnit) => {
+                              setTermUnit(unit)
+                              const months = toMonths(Number(termValue), unit)
+                              form.setValue('termMonths', months, { shouldValidate: true })
+                            }}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="days">Days</SelectItem>
+                              <SelectItem value="weeks">Weeks</SelectItem>
+                              <SelectItem value="months">Months</SelectItem>
+                              <SelectItem value="years">Years</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {termUnit !== 'months' && Number(termValue) > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            = {toMonths(Number(termValue), termUnit)} month(s) for scheduling
+                          </p>
+                        )}
+                      </div>
 
                       <FormDatePicker
                         name="startDate"
@@ -256,9 +309,9 @@ export default function NewLoanPage() {
               {loanCalculation ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-primary/10 rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Monthly Payment</p>
+                    <p className="text-sm text-muted-foreground mb-1">{loanCalculation.periodLabel}</p>
                     <p className="text-2xl font-bold text-primary">
-                      {formatCurrency(loanCalculation.monthlyPayment)}
+                      {formatCurrency(loanCalculation.periodicPayment)}
                     </p>
                   </div>
 
@@ -278,17 +331,15 @@ export default function NewLoanPage() {
                     </div>
 
                     <div className="flex justify-between items-center pb-2 border-b">
-                      <span className="text-sm text-muted-foreground">Principal Amount</span>
+                      <span className="text-sm text-muted-foreground">Principal</span>
                       <span className="font-semibold">
                         {formatCurrency(watchPrincipal)}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Loan Term</span>
-                      <span className="font-semibold">
-                        {watchTerm} {watchTerm === 1 ? 'month' : 'months'}
-                      </span>
+                      <span className="text-sm text-muted-foreground">Term</span>
+                      <span className="font-semibold">{termValue} {termUnit}</span>
                     </div>
                   </div>
                 </div>

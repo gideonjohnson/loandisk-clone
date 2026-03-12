@@ -11,8 +11,8 @@ export const createBorrowerSchema = z.object({
   dateOfBirth: z.string().optional().or(z.date().optional()),
   idNumber: z.string().optional(),
   employmentStatus: z.enum(["Employed", "Self-Employed", "Unemployed", "Retired", ""]).optional(),
-  monthlyIncome: z.number().min(0, "Monthly income cannot be negative").optional().or(z.nan()),
-  creditScore: z.number().min(300, "Credit score must be at least 300").max(850, "Credit score cannot exceed 850").optional().or(z.nan()),
+  monthlyIncome: z.coerce.number().min(0, "Monthly income cannot be negative").optional().or(z.nan()),
+  creditScore: z.coerce.number().min(300, "Credit score must be at least 300").max(850, "Credit score cannot exceed 850").optional().or(z.nan()),
 })
 
 export const updateBorrowerSchema = createBorrowerSchema.extend({

@@ -1,6 +1,6 @@
 /**
  * M-Pesa Integration Service (Safaricom Daraja API)
- * Supports STK Push (Lipa Na M-Pesa) and C2B payments
+ * Supports STK Push (Lipa Na M-Pesa), C2B payments, and B2C disbursements
  */
 
 import { prisma } from '@/lib/prisma'
@@ -12,6 +12,24 @@ export interface MpesaConfig {
   shortCode: string
   callbackUrl: string
   environment: 'sandbox' | 'production'
+  initiatorName?: string
+  b2cSecurityCredential?: string
+  b2cResultUrl?: string
+}
+
+export interface B2CRequest {
+  phoneNumber: string
+  amount: number
+  loanId: string
+  borrowerId?: string
+  remarks?: string
+}
+
+export interface B2CResponse {
+  success: boolean
+  conversationId?: string
+  originatorConversationId?: string
+  error?: string
 }
 
 export interface STKPushRequest {
@@ -74,7 +92,10 @@ export async function getMpesaConfig(): Promise<MpesaConfig | null> {
             'mpesa_pass_key',
             'mpesa_short_code',
             'mpesa_callback_url',
-            'mpesa_environment'
+            'mpesa_environment',
+            'mpesa_initiator_name',
+            'mpesa_b2c_security_credential',
+            'mpesa_b2c_result_url',
           ]
         }
       }
@@ -103,7 +124,10 @@ export async function getMpesaConfig(): Promise<MpesaConfig | null> {
       passKey,
       shortCode,
       callbackUrl: callbackUrl || '',
-      environment
+      environment,
+      initiatorName: config.mpesa_initiator_name || process.env.MPESA_INITIATOR_NAME,
+      b2cSecurityCredential: config.mpesa_b2c_security_credential || process.env.MPESA_B2C_SECURITY_CREDENTIAL,
+      b2cResultUrl: config.mpesa_b2c_result_url || process.env.MPESA_B2C_RESULT_URL || `${process.env.NEXTAUTH_URL}/api/payments/mpesa/b2c/callback`,
     }
   } catch (error) {
     console.error('Error getting M-Pesa config:', error)
@@ -123,7 +147,7 @@ function getBaseUrl(environment: 'sandbox' | 'production'): string {
 /**
  * Get OAuth access token from M-Pesa
  */
-async function getAccessToken(config: MpesaConfig): Promise<string | null> {
+export async function getAccessToken(config: MpesaConfig): Promise<string | null> {
   try {
     const auth = Buffer.from(`${config.consumerKey}:${config.consumerSecret}`).toString('base64')
     const baseUrl = getBaseUrl(config.environment)
@@ -434,10 +458,37 @@ export async function processC2BConfirmation(data: C2BCallbackData): Promise<{ s
       }
     })
 
-    // Try to match with a loan based on account reference
-    const loan = await prisma.loan.findFirst({
-      where: { loanNumber: data.BillRefNumber }
+    // Try to match loan by borrower name (account reference), fall back to loan number
+    const ref = data.BillRefNumber.trim()
+
+    let loan = await prisma.loan.findFirst({
+      where: { loanNumber: ref },
+      include: { borrower: true }
     })
+
+    if (!loan) {
+      // Match by borrower full name (case-insensitive)
+      const nameParts = ref.split(/\s+/)
+      const borrower = await prisma.borrower.findFirst({
+        where: {
+          AND: [
+            { firstName: { equals: nameParts[0], mode: 'insensitive' } },
+            { lastName: { equals: nameParts.slice(1).join(' ') || nameParts[0], mode: 'insensitive' } }
+          ]
+        },
+        include: {
+          loans: {
+            where: { status: { in: ['ACTIVE', 'DISBURSED'] } },
+            orderBy: { createdAt: 'desc' },
+            take: 1
+          }
+        }
+      })
+
+      if (borrower?.loans?.[0]) {
+        loan = { ...borrower.loans[0], borrower } as any
+      }
+    }
 
     if (loan) {
       await prisma.payment.create({
@@ -447,7 +498,7 @@ export async function processC2BConfirmation(data: C2BCallbackData): Promise<{ s
           paymentDate: new Date(),
           paymentMethod: 'MPESA',
           receiptNumber: data.TransID,
-          notes: `C2B payment from ${data.FirstName} ${data.LastName} (${data.MSISDN})`,
+          notes: `M-Pesa paybill from ${data.FirstName} ${data.LastName} (${data.MSISDN})`,
           status: 'COMPLETED'
         }
       })
@@ -457,5 +508,86 @@ export async function processC2BConfirmation(data: C2BCallbackData): Promise<{ s
   } catch (error) {
     console.error('C2B Confirmation error:', error)
     return { success: false }
+  }
+}
+
+/**
+ * Initiate B2C payment (Business to Customer — loan disbursement)
+ */
+export async function initiateB2CPayment(request: B2CRequest): Promise<B2CResponse> {
+  try {
+    const config = await getMpesaConfig()
+
+    if (!config) {
+      return { success: false, error: 'M-Pesa not configured' }
+    }
+
+    if (!config.initiatorName || !config.b2cSecurityCredential) {
+      return { success: false, error: 'M-Pesa B2C credentials not configured (initiator name / security credential missing)' }
+    }
+
+    const accessToken = await getAccessToken(config)
+    if (!accessToken) {
+      return { success: false, error: 'Failed to get M-Pesa access token' }
+    }
+
+    const baseUrl = getBaseUrl(config.environment)
+    const phoneNumber = formatPhoneNumber(request.phoneNumber)
+    const resultUrl = config.b2cResultUrl || `https://meekfund.ink/api/payments/mpesa/b2c/callback`
+
+    const payload = {
+      InitiatorName: config.initiatorName,
+      SecurityCredential: config.b2cSecurityCredential,
+      CommandID: 'BusinessPayment',
+      Amount: Math.round(request.amount),
+      PartyA: config.shortCode,
+      PartyB: phoneNumber,
+      Remarks: request.remarks || 'Loan disbursement',
+      QueueTimeOutURL: resultUrl,
+      ResultURL: resultUrl,
+      Occasion: request.loanId,
+    }
+
+    const response = await fetch(`${baseUrl}/mpesa/b2c/v1/paymentrequest`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const data = await response.json()
+
+    if (data.ResponseCode === '0') {
+      // Store pending transaction
+      await prisma.paymentTransaction.create({
+        data: {
+          provider: 'MPESA',
+          transactionType: 'B2C',
+          phoneNumber,
+          amount: request.amount,
+          accountReference: request.loanId,
+          status: 'PENDING',
+          loanId: request.loanId,
+          borrowerId: request.borrowerId,
+          resultDesc: `B2C initiated: ${data.ConversationID}`,
+        }
+      })
+
+      return {
+        success: true,
+        conversationId: data.ConversationID,
+        originatorConversationId: data.OriginatorConversationID,
+      }
+    }
+
+    return {
+      success: false,
+      error: data.errorMessage || data.ResponseDescription || 'B2C initiation failed',
+    }
+  } catch (error) {
+    console.error('B2C payment error:', error)
+    return { success: false, error: 'Failed to initiate B2C payment' }
   }
 }

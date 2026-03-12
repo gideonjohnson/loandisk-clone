@@ -56,8 +56,17 @@ async function postHandler(request: Request) {
 
     const loanNumber = generateLoanNumber()
     const startDate = new Date(body.startDate)
+    const termUnit = body.termUnit || 'months'
+    const termValue = parseInt(body.termMonths)
+
+    // Calculate end date based on term unit
     const endDate = new Date(startDate)
-    endDate.setMonth(endDate.getMonth() + body.termMonths)
+    switch (termUnit) {
+      case 'days':   endDate.setDate(endDate.getDate() + termValue); break
+      case 'weeks':  endDate.setDate(endDate.getDate() + termValue * 7); break
+      case 'years':  endDate.setFullYear(endDate.getFullYear() + termValue); break
+      default:       endDate.setMonth(endDate.getMonth() + termValue)
+    }
 
     // Create loan
     const loan = await prisma.loan.create({
@@ -67,7 +76,8 @@ async function postHandler(request: Request) {
         loanOfficerId: session.user.id,
         principalAmount: body.principalAmount,
         interestRate: body.interestRate,
-        termMonths: body.termMonths,
+        termMonths: termValue,
+        termUnit,
         startDate,
         endDate,
         purpose: body.purpose,
@@ -80,8 +90,9 @@ async function postHandler(request: Request) {
     const calculation = calculateLoan(
       parseFloat(body.principalAmount),
       parseFloat(body.interestRate),
-      parseInt(body.termMonths),
-      startDate
+      termValue,
+      startDate,
+      termUnit
     )
 
     const scheduleData = calculation.schedule.map(item => ({
@@ -121,7 +132,7 @@ async function postHandler(request: Request) {
     return NextResponse.json(loan)
   } catch (error) {
     console.error('Create loan error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error', message: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }
 

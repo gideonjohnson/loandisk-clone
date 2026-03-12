@@ -19,6 +19,7 @@ export default function PaymentSettingsPage() {
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
   const [settings, setSettings] = useState<Record<string, string>>({})
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [registering, setRegistering] = useState(false)
 
   const providers = [
     { id: 'mpesa', label: 'M-Pesa', icon: Smartphone, color: 'bg-green-500' },
@@ -37,6 +38,8 @@ export default function PaymentSettingsPage() {
         { value: 'sandbox', label: 'Sandbox (Testing)' },
         { value: 'production', label: 'Production (Live)' },
       ]},
+      { key: 'mpesa_initiator_name', value: '', label: 'Initiator Name (B2C)', description: 'API operator username from Daraja portal (required for loan disbursement via M-Pesa)', type: 'text' },
+      { key: 'mpesa_b2c_security_credential', value: '', label: 'B2C Security Credential', description: 'Encrypted initiator password (generated from Daraja portal)', type: 'password' },
     ],
     airtel: [
       { key: 'airtel_client_id', value: '', label: 'Client ID', description: 'Airtel API client ID', type: 'password' },
@@ -118,6 +121,20 @@ export default function PaymentSettingsPage() {
       setTestResult({ success: false, message: 'Failed to save settings' })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const registerC2BUrls = async () => {
+    setRegistering(true)
+    setTestResult(null)
+    try {
+      const res = await fetch('/api/payments/mpesa/register', { method: 'POST' })
+      const data = await res.json()
+      setTestResult({ success: data.success, message: data.message || data.error || 'Unknown response' })
+    } catch {
+      setTestResult({ success: false, message: 'Failed to reach registration endpoint' })
+    } finally {
+      setRegistering(false)
     }
   }
 
@@ -272,10 +289,24 @@ export default function PaymentSettingsPage() {
               </p>
               <p className="text-sm text-amber-800 font-mono bg-amber-100 px-3 py-2 rounded">
                 {activeProvider === 'mpesa'
-                  ? 'https://yourdomain.com/api/payments/mpesa/callback'
-                  : 'https://yourdomain.com/api/payments/airtel/callback'
+                  ? 'https://meekfund.ink/api/payments/mpesa/callback'
+                  : 'https://meekfund.ink/api/payments/airtel/callback'
                 }
               </p>
+              {activeProvider === 'mpesa' && (
+                <div className="mt-4">
+                  <p className="text-sm text-amber-700 mb-2">
+                    For paybill (C2B) payments, register the callback URL with Safaricom so they know where to send payment notifications:
+                  </p>
+                  <button
+                    onClick={registerC2BUrls}
+                    disabled={registering}
+                    className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {registering ? 'Registering...' : 'Register C2B URLs with Safaricom'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

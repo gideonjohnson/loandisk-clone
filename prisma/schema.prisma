@@ -94,6 +94,7 @@ model Loan {
   principalAmount   Decimal
   interestRate      Decimal
   termMonths        Int
+  termUnit          String   @default("months")
   startDate         DateTime
   endDate           DateTime
   status            String      @default("PENDING")

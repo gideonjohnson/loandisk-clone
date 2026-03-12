@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -122,7 +122,8 @@ interface LoanDetailPageProps {
   }
 }
 
-export default function LoanDetailPage({ params }: LoanDetailPageProps) {
+export default function LoanDetailPage() {
+  const params = useParams()
   const [loan, setLoan] = useState<LoanData | null>(null)
   const [signatures, setSignatures] = useState<SignatureRequest[]>([])
   const [fraudCheck, setFraudCheck] = useState<FraudCheckSummary | null>(null)
@@ -135,14 +136,14 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
     try {
       const response = await fetch(`/api/loans/${params.id}`)
       if (!response.ok) {
-        throw new Error('Failed to fetch loan')
+        const errData = await response.json().catch(() => ({})); throw new Error(errData.message || 'Failed to fetch loan')
       }
       const data = await response.json()
       setLoan(data.loan || data)
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to load loan details',
+        description: error instanceof Error ? error.message : 'Failed to load loan details',
         variant: 'destructive',
       })
     } finally {
@@ -499,6 +500,11 @@ export default function LoanDetailPage({ params }: LoanDetailPageProps) {
             loanNumber: loan.loanNumber,
             principalAmount: loan.principalAmount,
             status: loan.status,
+            borrower: loan.borrower ? {
+              firstName: loan.borrower.firstName,
+              lastName: loan.borrower.lastName,
+              phone: loan.borrower.phone,
+            } : undefined,
             disbursement: loan.disbursement,
           }}
           onDisbursementComplete={fetchLoan}

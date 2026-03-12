@@ -7,6 +7,7 @@ import { sendLoanDisbursedNotification } from '@/lib/notifications/notificationS
 import { sendLoanDisbursedSMS } from '@/lib/sms/smsService'
 import { sendLoanDisbursedEmail } from '@/lib/email/emailService'
 import { withRateLimit, RATE_LIMITS } from '@/lib/security/rateLimit'
+import { initiateB2CPayment } from '@/lib/payments/mpesa'
 
 /**
  * POST /api/loans/:id/disburse
@@ -134,6 +135,23 @@ const handler = createAuthHandler(
         },
       })
 
+      // If M-Pesa, initiate B2C transfer automatically
+      let b2cResult = null
+      if (disbursementMethod === 'M_PESA' && updatedLoan.borrower.phone) {
+        b2cResult = await initiateB2CPayment({
+          phoneNumber: updatedLoan.borrower.phone,
+          amount: Number(disbursementAmount),
+          loanId: id,
+          borrowerId: updatedLoan.borrower.id,
+          remarks: `Loan ${updatedLoan.loanNumber}`,
+        })
+
+        if (!b2cResult.success) {
+          console.error('B2C initiation failed:', b2cResult.error)
+          // Disbursement record already created — log warning but don't fail the request
+        }
+      }
+
       // Apply processing fees
       const appliedFees = await applyDisbursementFees(
         id,
@@ -195,10 +213,15 @@ const handler = createAuthHandler(
 
       return NextResponse.json({
         success: true,
-        message: 'Loan disbursed successfully',
+        message: disbursementMethod === 'M_PESA'
+          ? b2cResult?.success
+            ? `Loan disbursed — KSh ${Number(disbursementAmount).toLocaleString()} sent to ${updatedLoan.borrower.phone} via M-Pesa`
+            : `Loan recorded as disbursed. M-Pesa transfer could not be initiated: ${b2cResult?.error || 'unknown error'}. Please send manually.`
+          : 'Loan disbursed successfully',
         loan: updatedLoan,
         disbursement,
         appliedFees,
+        b2c: b2cResult,
       })
     } catch (error) {
       console.error('Loan disbursement error:', error)

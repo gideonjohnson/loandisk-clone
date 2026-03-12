@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Permission } from '@/lib/permissions'
-import { DollarSign, Calendar, Building2, Hash, FileText } from 'lucide-react'
+import { DollarSign, Calendar, Building2, Hash, FileText, Smartphone, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface Loan {
@@ -24,6 +24,11 @@ interface Loan {
   loanNumber: string
   principalAmount: number
   status: string
+  borrower?: {
+    firstName: string
+    lastName: string
+    phone?: string | null
+  }
   disbursement?: {
     id: string
     amount: number
@@ -43,11 +48,22 @@ interface LoanDisbursementFormProps {
   onDisbursementComplete?: () => void
 }
 
+const METHOD_LABELS: Record<string, string> = {
+  M_PESA: 'M-Pesa',
+  AIRTEL_MONEY: 'Airtel Money',
+  BANK_TRANSFER: 'Bank Transfer',
+  CASH: 'Cash',
+  CHECK: 'Cheque',
+}
+
 export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbursementFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [step, setStep] = useState<'form' | 'confirm' | 'processing'>('form')
   const [formData, setFormData] = useState({
     disbursementMethod: 'M_PESA',
+    phoneNumber: loan.borrower?.phone || '',
     referenceNumber: '',
+    bankName: '',
+    accountNumber: '',
     bankDetails: '',
     disbursedAt: format(new Date(), 'yyyy-MM-dd'),
     amount: loan.principalAmount.toString(),
@@ -55,29 +71,28 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
 
   const { toast } = useToast()
   const { can } = usePermissions()
-
   const canDisburse = can(Permission.LOAN_DISBURSE)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const isMobileMoney = formData.disbursementMethod === 'M_PESA' || formData.disbursementMethod === 'AIRTEL_MONEY'
+  const isBankTransfer = formData.disbursementMethod === 'BANK_TRANSFER'
 
-    if (!canDisburse) {
-      toast({
-        title: 'Permission Denied',
-        description: 'You do not have permission to disburse loans',
-        variant: 'destructive',
-      })
-      return
-    }
-
-    setIsSubmitting(true)
+  const handleSubmit = async () => {
+    setStep('processing')
     try {
+      const bankDetails = isBankTransfer
+        ? [formData.bankName, formData.accountNumber, formData.bankDetails].filter(Boolean).join(' | ')
+        : formData.bankDetails
+
       const response = await fetch(`/api/loans/${loan.id}/disburse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          disbursementMethod: formData.disbursementMethod,
+          referenceNumber: formData.referenceNumber || undefined,
+          bankDetails: bankDetails || undefined,
+          disbursedAt: formData.disbursedAt,
           amount: parseFloat(formData.amount),
+          phoneNumber: isMobileMoney ? formData.phoneNumber : undefined,
         }),
       })
 
@@ -87,11 +102,7 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
         throw new Error(data.error || 'Failed to disburse loan')
       }
 
-      toast({
-        title: 'Loan Disbursed',
-        description: data.message,
-      })
-
+      toast({ title: 'Disbursement Complete', description: data.message })
       onDisbursementComplete?.()
     } catch (error) {
       toast({
@@ -99,36 +110,34 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
         description: error instanceof Error ? error.message : 'Failed to disburse loan',
         variant: 'destructive',
       })
-    } finally {
-      setIsSubmitting(false)
+      setStep('form')
     }
   }
 
-  // If loan is already disbursed, show disbursement details
+  // Already disbursed — show summary
   if (loan.disbursement) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Disbursement Details</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-600" />
+            Disbursement Details
+          </CardTitle>
           <CardDescription>Loan has been disbursed</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Amount Disbursed</p>
-              <p className="text-lg font-semibold">
-                KSh {Number(loan.disbursement.amount).toLocaleString()}
-              </p>
+              <p className="text-lg font-semibold">KSh {Number(loan.disbursement.amount).toLocaleString()}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Method</p>
-              <p className="text-sm font-medium">{loan.disbursement.disbursementMethod.replace('_', ' ')}</p>
+              <p className="text-sm font-medium">{METHOD_LABELS[loan.disbursement.disbursementMethod] || loan.disbursement.disbursementMethod}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Disbursement Date</p>
-              <p className="text-sm font-medium">
-                {format(new Date(loan.disbursement.disbursedAt), 'MMM dd, yyyy')}
-              </p>
+              <p className="text-sm text-muted-foreground">Date</p>
+              <p className="text-sm font-medium">{format(new Date(loan.disbursement.disbursedAt), 'MMM dd, yyyy')}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Disbursed By</p>
@@ -136,17 +145,15 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
               <p className="text-xs text-muted-foreground">{loan.disbursement.disbursedByUser.role}</p>
             </div>
           </div>
-
           {loan.disbursement.referenceNumber && (
             <div>
-              <p className="text-sm text-muted-foreground">Reference Number</p>
+              <p className="text-sm text-muted-foreground">Reference</p>
               <p className="text-sm font-mono font-medium">{loan.disbursement.referenceNumber}</p>
             </div>
           )}
-
           {loan.disbursement.bankDetails && (
             <div>
-              <p className="text-sm text-muted-foreground">Bank Details</p>
+              <p className="text-sm text-muted-foreground">Details</p>
               <p className="text-sm">{loan.disbursement.bankDetails}</p>
             </div>
           )}
@@ -155,7 +162,6 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
     )
   }
 
-  // If loan is not approved, show message
   if (loan.status !== 'APPROVED') {
     return (
       <Card>
@@ -167,23 +173,104 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
           <p className="text-sm text-muted-foreground">
             Current status: <span className="font-medium">{loan.status}</span>
           </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            The loan must be approved before it can be disbursed.
-          </p>
         </CardContent>
       </Card>
     )
   }
 
-  // Show disbursement form
+  // Processing state
+  if (step === 'processing') {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+          <p className="text-sm font-medium">Processing disbursement...</p>
+          {isMobileMoney && (
+            <p className="text-xs text-muted-foreground">Sending KSh {Number(formData.amount).toLocaleString()} to {formData.phoneNumber}</p>
+          )}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Confirmation step
+  if (step === 'confirm') {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            Confirm Disbursement
+          </CardTitle>
+          <CardDescription>Please review before proceeding</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg border p-4 space-y-3 bg-muted/40">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Borrower</span>
+              <span className="font-medium">{loan.borrower ? `${loan.borrower.firstName} ${loan.borrower.lastName}` : '—'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Loan</span>
+              <span className="font-mono font-medium">{loan.loanNumber}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Amount</span>
+              <span className="font-semibold text-base">KSh {Number(formData.amount).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Method</span>
+              <span className="font-medium">{METHOD_LABELS[formData.disbursementMethod]}</span>
+            </div>
+            {isMobileMoney && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Phone</span>
+                <span className="font-medium">{formData.phoneNumber}</span>
+              </div>
+            )}
+            {isBankTransfer && formData.bankName && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Bank</span>
+                <span className="font-medium">{formData.bankName}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Date</span>
+              <span className="font-medium">{format(new Date(formData.disbursedAt), 'MMM dd, yyyy')}</span>
+            </div>
+          </div>
+
+          {formData.disbursementMethod === 'M_PESA' && (
+            <p className="text-xs text-blue-700 bg-blue-50 px-3 py-2 rounded">
+              Funds will be sent automatically to the borrower's M-Pesa via B2C transfer.
+            </p>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" onClick={() => setStep('form')} className="flex-1">
+              Back
+            </Button>
+            <Button onClick={handleSubmit} className="flex-1">
+              Confirm & Disburse
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Main form
   return (
     <Card>
       <CardHeader>
         <CardTitle>Disburse Loan</CardTitle>
-        <CardDescription>Record loan disbursement details</CardDescription>
+        <CardDescription>Record loan disbursement — {loan.loanNumber}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={(e) => { e.preventDefault(); setStep('confirm') }}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="amount">
               <DollarSign className="h-4 w-4 inline mr-1" />
@@ -193,12 +280,13 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
               id="amount"
               type="number"
               step="0.01"
+              min="1"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               required
             />
             <p className="text-xs text-muted-foreground">
-              Principal amount: KSh {Number(loan.principalAmount).toLocaleString()}
+              Principal: KSh {Number(loan.principalAmount).toLocaleString()}
             </p>
           </div>
 
@@ -209,22 +297,102 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
             </Label>
             <Select
               value={formData.disbursementMethod}
-              onValueChange={(value) =>
-                setFormData({ ...formData, disbursementMethod: value })
-              }
+              onValueChange={(value) => setFormData({ ...formData, disbursementMethod: value })}
             >
               <SelectTrigger id="disbursementMethod">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="M_PESA">M-Pesa</SelectItem>
+                <SelectItem value="M_PESA">M-Pesa (automatic B2C)</SelectItem>
+                <SelectItem value="AIRTEL_MONEY">Airtel Money</SelectItem>
                 <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
                 <SelectItem value="CASH">Cash</SelectItem>
-                <SelectItem value="AIRTEL_MONEY">Airtel Money</SelectItem>
                 <SelectItem value="CHECK">Cheque</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
+          {/* Mobile money — phone number */}
+          {isMobileMoney && (
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">
+                <Smartphone className="h-4 w-4 inline mr-1" />
+                {formData.disbursementMethod === 'M_PESA' ? 'M-Pesa' : 'Airtel Money'} Number *
+              </Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                placeholder="07XXXXXXXX"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                required
+              />
+              {formData.disbursementMethod === 'M_PESA' && (
+                <p className="text-xs text-blue-600">
+                  Funds will be pushed automatically to this number via M-Pesa B2C.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Bank transfer fields */}
+          {isBankTransfer && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="bankName">Bank Name</Label>
+                <Input
+                  id="bankName"
+                  placeholder="e.g. Equity Bank"
+                  value={formData.bankName}
+                  onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="accountNumber">
+                  <Hash className="h-4 w-4 inline mr-1" />
+                  Account Number
+                </Label>
+                <Input
+                  id="accountNumber"
+                  placeholder="Account number"
+                  value={formData.accountNumber}
+                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Cheque — reference number */}
+          {formData.disbursementMethod === 'CHECK' && (
+            <div className="space-y-2">
+              <Label htmlFor="referenceNumber">
+                <Hash className="h-4 w-4 inline mr-1" />
+                Cheque Number
+              </Label>
+              <Input
+                id="referenceNumber"
+                placeholder="e.g. 001234"
+                value={formData.referenceNumber}
+                onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
+              />
+            </div>
+          )}
+
+          {/* Manual reference for non-M-Pesa mobile */}
+          {formData.disbursementMethod === 'AIRTEL_MONEY' && (
+            <div className="space-y-2">
+              <Label htmlFor="referenceNumber">
+                <Hash className="h-4 w-4 inline mr-1" />
+                Transaction Reference
+              </Label>
+              <Input
+                id="referenceNumber"
+                placeholder="Airtel transaction ID"
+                value={formData.referenceNumber}
+                onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="disbursedAt">
@@ -241,43 +409,28 @@ export function LoanDisbursementForm({ loan, onDisbursementComplete }: LoanDisbu
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="referenceNumber">
-              <Hash className="h-4 w-4 inline mr-1" />
-              Reference Number
-            </Label>
-            <Input
-              id="referenceNumber"
-              placeholder="e.g., TXN123456789"
-              value={formData.referenceNumber}
-              onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">
-              Transaction or transfer reference number
-            </p>
-          </div>
-
+          {/* Optional notes for all methods */}
           <div className="space-y-2">
             <Label htmlFor="bankDetails">
               <FileText className="h-4 w-4 inline mr-1" />
-              Bank Details / Notes
+              Notes (optional)
             </Label>
             <Textarea
               id="bankDetails"
-              placeholder="Bank name, account details, or other relevant information..."
+              placeholder="Any additional notes..."
               value={formData.bankDetails}
               onChange={(e) => setFormData({ ...formData, bankDetails: e.target.value })}
-              rows={3}
+              rows={2}
             />
           </div>
 
           <div className="flex gap-2 pt-4">
             <Button
               type="submit"
-              disabled={isSubmitting || !canDisburse}
+              disabled={!canDisburse}
               className="flex-1"
             >
-              {isSubmitting ? 'Processing...' : 'Disburse Loan'}
+              Review & Confirm
             </Button>
           </div>
 

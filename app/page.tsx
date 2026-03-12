@@ -1004,7 +1004,13 @@ export default function Home() {
           </div>
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              &copy; 2026 Meek. All rights reserved.
+              &copy; 2026 Meek. All rights reserved.{' '}
+              <span className="text-gray-600 text-xs">
+                IT solutions by{' '}
+                <a href="https://dafdev.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">
+                  DAF Developers
+                </a>
+              </span>
             </p>
             <div className="flex items-center gap-4 text-gray-400">
               <Link href="#" className="hover:text-white transition-colors">Twitter</Link>

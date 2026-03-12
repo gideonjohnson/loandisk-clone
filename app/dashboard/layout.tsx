@@ -194,6 +194,12 @@ export default function DashboardLayout({
                 <LogOut className="h-5 w-5" />
               </button>
             </div>
+            <p className="mt-3 text-center text-[10px] text-white/20">
+              IT by{' '}
+              <a href="https://dafdev.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/40 transition-colors">
+                DAF Developers
+              </a>
+            </p>
           </div>
         </div>
       </div>

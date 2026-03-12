@@ -350,6 +350,12 @@ export default function LoanCalculatorPage() {
           <p className="text-center text-sm text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()} Meek Microfinance. All rights reserved.
           </p>
+          <p className="text-center text-xs text-gray-400/60 dark:text-gray-600 mt-1">
+            IT solutions by{' '}
+            <a href="https://dafdev.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-500 dark:hover:text-gray-400 transition-colors hover:underline underline-offset-2">
+              DAF Developers
+            </a>
+          </p>
         </div>
       </footer>
     </div>
